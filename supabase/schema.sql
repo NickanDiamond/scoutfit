@@ -1,4 +1,6 @@
 -- ScoutFit database schema (run in Supabase SQL editor)
+-- Weight dimensions match club_weights columns: passing, dribbling,
+-- creativity, defending, pressing, age.
 
 create table clubs (
   id uuid primary key default gen_random_uuid(),
@@ -23,14 +25,15 @@ create table player_stats (
   player_id uuid references players(id) on delete cascade,
   season text,
   minutes int,
-  passing_accuracy numeric,
-  progressive_passes numeric,
-  progressive_carries numeric,
-  expected_assists numeric,
-  shot_creating_actions numeric,
-  tackles numeric,
-  interceptions numeric,
-  pressures numeric
+  passing_accuracy numeric,       -- % (0-100), feeds "passing"
+  progressive_passes numeric,     -- count for the season, feeds "passing"
+  progressive_carries numeric,    -- count for the season, feeds "dribbling"
+  dribbles_completed numeric,     -- count for the season, feeds "dribbling"
+  expected_assists numeric,       -- count for the season, feeds "creativity"
+  shot_creating_actions numeric,  -- count for the season, feeds "creativity"
+  tackles numeric,                -- count for the season, feeds "defending"
+  interceptions numeric,          -- count for the season, feeds "defending"
+  pressures numeric               -- count for the season, feeds "pressing"
 );
 
 create table club_weights (

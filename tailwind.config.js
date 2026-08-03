@@ -4,6 +4,16 @@ module.exports = {
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
   ],
-  theme: { extend: {} },
+  theme: {
+    extend: {
+      colors: {
+        pitch: {
+          400: "#4ade80",
+          500: "#22c55e",
+          600: "#16a34a",
+        },
+      },
+    },
+  },
   plugins: [],
 };
