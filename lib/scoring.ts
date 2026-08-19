@@ -73,3 +73,24 @@ export function minMaxNormalize(values: number[]): number[] {
   if (max === min) return values.map(() => 50);
   return values.map((v) => ((v - min) / (max - min)) * 100);
 }
+
+// Simple equal-weight split across whichever stats the user picked as
+// mattering — no sliders, no percentages to reason about.
+export function equalWeights(selected: Metric[]): Weights {
+  const w = {} as Weights;
+  METRICS.forEach((m) => {
+    w[m] = 0;
+  });
+  if (selected.length === 0) return w;
+  const share = Math.round(100 / selected.length);
+  selected.forEach((m) => {
+    w[m] = share;
+  });
+  return w;
+}
+
+// Given a club's default weight profile, suggest the top N stats as a
+// sensible starting point for the "which stats matter" step.
+export function topMetrics(weights: Weights, n = 2): Metric[] {
+  return [...METRICS].sort((a, b) => weights[b] - weights[a]).slice(0, n);
+}

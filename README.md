@@ -33,12 +33,14 @@ these are reasonable characterizations, not official club data.
 - **3 positions** (Defender / Midfielder / Forward) instead of an invented
   RW/CB/CM/ST scheme — plain language, and it matches what free data
   actually supports.
-- **5 scoring dimensions**, each with a one-line explanation shown right
-  on the slider: Creativity, Threat, Influence, Output (goals+assists per
-  90), Reliability (minutes played vs. a full season). No fabricated
-  passing/dribbling numbers.
-- **Numbered steps** in the UI (1. Club → 2. Position → 3. Priorities →
-  4. Ranked list → 5. Compare) so the flow is obvious without instructions.
+- **5 scoring dimensions**, each with a one-line explanation: Creativity,
+  Threat, Influence, Output (goals+assists per 90), Reliability (minutes
+  played vs. a full season). No fabricated passing/dribbling numbers.
+- **A step-by-step wizard** instead of one dense dashboard: pick a club,
+  pick the position they need, check off which stats matter (equal
+  weight each — no percentages to reason about, pre-checked with that
+  club's usual top 2 priorities), then see the ranked list. Compare and
+  search only appear once you have results.
 
 ## Connecting the real database
 
