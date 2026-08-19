@@ -6,7 +6,7 @@ a database.
 
 ## Real data, not fictional players
 
-The sample pool (27 players: 9 defenders, 9 midfielders, 9 forwards) is
+The sample pool (84 players: 31 defenders, 36 midfielders, 17 forwards) is
 real 2024-25 Premier League season data — goals, assists, minutes,
 creativity, influence, threat, and FPL price — sourced from the public
 [vaastav/Fantasy-Premier-League](https://github.com/vaastav/Fantasy-Premier-League)
@@ -47,18 +47,17 @@ these are reasonable characterizations, not official club data.
 1. Create a project at supabase.com.
 2. Paste `supabase/schema.sql` into the SQL editor and run it. It creates:
    `clubs`, `players`, `player_stats`, `club_weights`, `saved_analyses`.
-3. Add rows to `clubs` and matching `club_weights` rows (one per club per
-   position, with `creativity_weight`, `threat_weight`,
-   `influence_weight`, `productivity_weight`, `reliability_weight` — these
-   don't need to sum to 100, the app normalizes them).
-4. Import players into `players` + `player_stats` (season defaults to
-   `"2024-2025"` — see `DEFAULT_SEASON` in `lib/db.ts`). You can pull more
-   real seasons/players from the same vaastav dataset, or swap in FBref /
-   Transfermarkt data if you want non-Premier-League clubs.
-5. Copy `.env.local.example` to `.env.local` and fill in your project URL
+3. Paste `supabase/seed.sql` into a new query and run it — this loads the
+   same 84 real players (and matching club_weights) used in the offline
+   sample, so your database starts non-empty. Both files are generated
+   together by `node generate-real-data.cjs`.
+4. Copy `.env.local.example` to `.env.local` and fill in your project URL
    and anon key (Project Settings → API).
-6. Restart `npm run dev` — the badge switches to "Live database" once
+5. Restart `npm run dev` — the badge switches to "Live database" once
    real env vars are detected.
+6. To grow past 84 players: add more rows to the `RAW` object in
+   `generate-real-data.cjs` (same real-data source, more clubs/players),
+   regenerate, and re-run the new `supabase/seed.sql`.
 
 ## How the scoring works
 
