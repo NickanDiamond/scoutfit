@@ -1,6 +1,7 @@
 -- ScoutFit database schema (run in Supabase SQL editor)
--- Weight dimensions match club_weights columns: passing, dribbling,
--- creativity, defending, pressing, age.
+-- Metrics match what's actually available from free player data (FPL-style
+-- stats): creativity, threat, influence, goals/assists, minutes. No
+-- invented passing/dribbling numbers.
 
 create table clubs (
   id uuid primary key default gen_random_uuid(),
@@ -13,10 +14,9 @@ create table clubs (
 create table players (
   id uuid primary key default gen_random_uuid(),
   name text not null,
-  age int,
   club text,
-  position text,
-  market_value numeric,
+  position text,           -- 'DEF' | 'MID' | 'FWD'
+  price numeric,            -- FPL-style price in £m (not an official valuation)
   created_at timestamptz default now()
 );
 
@@ -25,27 +25,22 @@ create table player_stats (
   player_id uuid references players(id) on delete cascade,
   season text,
   minutes int,
-  passing_accuracy numeric,       -- % (0-100), feeds "passing"
-  progressive_passes numeric,     -- count for the season, feeds "passing"
-  progressive_carries numeric,    -- count for the season, feeds "dribbling"
-  dribbles_completed numeric,     -- count for the season, feeds "dribbling"
-  expected_assists numeric,       -- count for the season, feeds "creativity"
-  shot_creating_actions numeric,  -- count for the season, feeds "creativity"
-  tackles numeric,                -- count for the season, feeds "defending"
-  interceptions numeric,          -- count for the season, feeds "defending"
-  pressures numeric               -- count for the season, feeds "pressing"
+  goals_scored numeric,
+  assists numeric,
+  creativity numeric,
+  influence numeric,
+  threat numeric
 );
 
 create table club_weights (
   id uuid primary key default gen_random_uuid(),
   club_id uuid references clubs(id) on delete cascade,
-  position text not null,
-  passing_weight numeric,
-  dribbling_weight numeric,
+  position text not null,   -- 'DEF' | 'MID' | 'FWD'
   creativity_weight numeric,
-  defending_weight numeric,
-  pressing_weight numeric,
-  age_weight numeric
+  threat_weight numeric,
+  influence_weight numeric,
+  productivity_weight numeric,
+  reliability_weight numeric
 );
 
 create table saved_analyses (

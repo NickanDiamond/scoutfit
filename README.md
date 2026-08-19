@@ -1,11 +1,22 @@
 # ScoutFit — Transfer Fit Analyzer
 
 Next.js (App Router) + Tailwind + Recharts + lucide-react, wired to
-Supabase, with an offline sample-data fallback so it runs before you
-connect a database.
+Supabase, with a real-data offline fallback so it runs before you connect
+a database.
 
-Covers the full MVP scope: 5 clubs, 4 positions, 40 sample players (10
-per position) until you swap in a real dataset.
+## Real data, not fictional players
+
+The sample pool (27 players: 9 defenders, 9 midfielders, 9 forwards) is
+real 2024-25 Premier League season data — goals, assists, minutes,
+creativity, influence, threat, and FPL price — sourced from the public
+[vaastav/Fantasy-Premier-League](https://github.com/vaastav/Fantasy-Premier-League)
+dataset, which mirrors the official Fantasy Premier League API. "Price" is
+an FPL game price, not an official transfer valuation — treat it as a
+rough proxy, not gospel.
+
+The 5 clubs (Arsenal, Liverpool, Manchester City, Manchester United,
+Chelsea) have illustrative tactical-style weight profiles per position —
+these are reasonable characterizations, not official club data.
 
 ## Run it locally
 
@@ -15,54 +26,54 @@ per position) until you swap in a real dataset.
    npm install
    npm run dev
    ```
-3. Open http://localhost:3000. Without a `.env.local`, it runs on the
-   sample/fictional players in `lib/sampleData.ts` — the badge in the top
-   bar shows "Sample data" vs "Live database".
+3. Open http://localhost:3000.
+
+## How it's simplified
+
+- **3 positions** (Defender / Midfielder / Forward) instead of an invented
+  RW/CB/CM/ST scheme — plain language, and it matches what free data
+  actually supports.
+- **5 scoring dimensions**, each with a one-line explanation shown right
+  on the slider: Creativity, Threat, Influence, Output (goals+assists per
+  90), Reliability (minutes played vs. a full season). No fabricated
+  passing/dribbling numbers.
+- **Numbered steps** in the UI (1. Club → 2. Position → 3. Priorities →
+  4. Ranked list → 5. Compare) so the flow is obvious without instructions.
 
 ## Connecting the real database
 
 1. Create a project at supabase.com.
 2. Paste `supabase/schema.sql` into the SQL editor and run it. It creates:
    `clubs`, `players`, `player_stats`, `club_weights`, `saved_analyses`.
-3. Add rows to `clubs` and matching rows to `club_weights` (one row per
-   club per position, with `passing_weight`, `dribbling_weight`,
-   `creativity_weight`, `defending_weight`, `pressing_weight`,
-   `age_weight` — these don't need to sum to exactly 100, the app
-   normalizes them).
+3. Add rows to `clubs` and matching `club_weights` rows (one per club per
+   position, with `creativity_weight`, `threat_weight`,
+   `influence_weight`, `productivity_weight`, `reliability_weight` — these
+   don't need to sum to 100, the app normalizes them).
 4. Import players into `players` + `player_stats` (season defaults to
-   `"2024-2025"` — see `DEFAULT_SEASON` in `lib/db.ts`).
+   `"2024-2025"` — see `DEFAULT_SEASON` in `lib/db.ts`). You can pull more
+   real seasons/players from the same vaastav dataset, or swap in FBref /
+   Transfermarkt data if you want non-Premier-League clubs.
 5. Copy `.env.local.example` to `.env.local` and fill in your project URL
    and anon key (Project Settings → API).
 6. Restart `npm run dev` — the badge switches to "Live database" once
-   real env vars are detected, and the app fetches from Supabase instead.
+   real env vars are detected.
 
 ## How the scoring works
 
-- `lib/scoring.ts` — pure functions: `minMaxNormalize` (scales a list of
-  raw numbers to 0-100), `ageScore` (scores age against a 24-27 "prime
-  years" band, not against the pool), `fitScore`/`rankPlayers` (weighted
-  sum of a player's 6 normalized dimensions: passing, dribbling,
-  creativity, defending, pressing, age).
+- `lib/scoring.ts` — `minMaxNormalize` (scales raw numbers to 0-100),
+  `fitScore`/`rankPlayers` (weighted sum of a player's 5 normalized
+  dimensions).
 - `lib/db.ts` — `getPlayersForPosition` fetches raw stats from
-  `player_stats`, converts counting stats to per-90, min-max normalizes
-  each raw stat across the fetched pool, then averages related sub-stats
-  into the 6 scoring dimensions.
-- `lib/sampleData.ts` — offline fallback with the same shape `lib/db.ts`
-  produces. Regenerate it (different clubs, positions, or player count)
-  by editing and re-running `node generate-data.cjs`.
-
-## UI
-
-Club/position pickers, a name filter, adjustable weight sliders (with
-reset-to-club-default), a ranked table with medal badges for the top 3
-and a live fit-score bar, and a radar-chart comparison for up to 3
-selected players.
+  `player_stats`, derives output (goals+assists per 90) and reliability
+  (minutes vs. a full season), then min-max normalizes all 5 dimensions
+  across the fetched pool.
+- `lib/sampleData.ts` — the real offline data described above, generated
+  by `node generate-real-data.cjs` (edit the RAW stats there to refresh
+  or expand it).
 
 ## Next steps
 
-- Clean an FBref + Transfermarkt dataset with pandas and load it into
-  `players`/`player_stats` (a one-off Python import script, not part of
-  this repo yet — swaps out the 40 sample players for the real ~100-300).
-- Hand-write real `club_weights` rows for your chosen clubs/positions.
+- Pull more players/positions from the same free dataset to grow past 27.
+- Hand-write real `club_weights` rows once you're on Supabase.
 - Add a player detail view / saved_analyses persistence for logged-in users.
 - Deploy to Vercel — add the same env vars in the project settings there.

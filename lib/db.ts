@@ -1,5 +1,5 @@
 import { supabase } from "./supabaseClient";
-import { Player, Weights, minMaxNormalize, ageScore } from "./scoring";
+import { Player, Weights, minMaxNormalize } from "./scoring";
 import { PositionKey } from "./sampleData";
 
 export const DEFAULT_SEASON = "2024-2025";
@@ -24,7 +24,7 @@ export async function getClubWeights(
   const { data, error } = await supabase
     .from("club_weights")
     .select(
-      "passing_weight, dribbling_weight, creativity_weight, defending_weight, pressing_weight, age_weight"
+      "creativity_weight, threat_weight, influence_weight, productivity_weight, reliability_weight"
     )
     .eq("club_id", clubId)
     .eq("position", position)
@@ -32,39 +32,35 @@ export async function getClubWeights(
   if (error) throw error;
   if (!data) return null;
   return {
-    passing: data.passing_weight ?? 0,
-    dribbling: data.dribbling_weight ?? 0,
     creativity: data.creativity_weight ?? 0,
-    defending: data.defending_weight ?? 0,
-    pressing: data.pressing_weight ?? 0,
-    age: data.age_weight ?? 0,
+    threat: data.threat_weight ?? 0,
+    influence: data.influence_weight ?? 0,
+    productivity: data.productivity_weight ?? 0,
+    reliability: data.reliability_weight ?? 0,
   };
 }
 
 interface RawPlayerRow {
   id: string;
   name: string;
-  age: number;
-  market_value: number;
+  price: number;
   player_stats: {
     minutes: number;
-    passing_accuracy: number | null;
-    progressive_passes: number | null;
-    progressive_carries: number | null;
-    dribbles_completed: number | null;
-    expected_assists: number | null;
-    shot_creating_actions: number | null;
-    tackles: number | null;
-    interceptions: number | null;
-    pressures: number | null;
+    goals_scored: number | null;
+    assists: number | null;
+    creativity: number | null;
+    influence: number | null;
+    threat: number | null;
   }[];
 }
 
+const FULL_SEASON_MINUTES = 3420;
+
 // Fetches every player at `position` with a player_stats row for `season`,
-// converts counting stats to per-90, min-max normalizes each raw stat
-// across the fetched pool, then averages the normalized sub-stats that
-// belong to the same scoring dimension. Age is scored separately via a
-// prime-years curve (not pool-relative).
+// derives "output" (goals+assists per 90) and "reliability" (minutes played
+// vs a full season), then min-max normalizes creativity/threat/influence/
+// output/reliability across the fetched pool so every dimension lands on a
+// comparable 0-100 scale.
 export async function getPlayersForPosition(
   position: PositionKey,
   season: string = DEFAULT_SEASON
@@ -74,8 +70,8 @@ export async function getPlayersForPosition(
   const { data, error } = await supabase
     .from("players")
     .select(
-      `id, name, age, market_value,
-       player_stats!inner ( minutes, passing_accuracy, progressive_passes, progressive_carries, dribbles_completed, expected_assists, shot_creating_actions, tackles, interceptions, pressures )`
+      `id, name, price,
+       player_stats!inner ( minutes, goals_scored, assists, creativity, influence, threat )`
     )
     .eq("position", position)
     .eq("player_stats.season", season);
@@ -84,46 +80,38 @@ export async function getPlayersForPosition(
   const rows = (data ?? []) as unknown as RawPlayerRow[];
   if (rows.length === 0) return [];
 
-  const per90 = (value: number | null, minutes: number) =>
-    minutes > 0 ? ((value ?? 0) / minutes) * 90 : 0;
+  const clip = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
 
-  const stats = rows.map((r) => {
+  const derived = rows.map((r) => {
     const s = r.player_stats[0];
+    const minutes = s.minutes || 0;
+    const productivity = minutes > 0 ? (((s.goals_scored ?? 0) + (s.assists ?? 0)) / minutes) * 90 : 0;
+    const reliability = clip((minutes / FULL_SEASON_MINUTES) * 100, 0, 100);
     return {
-      passingAccuracy: s.passing_accuracy ?? 0,
-      progressivePasses: per90(s.progressive_passes, s.minutes),
-      progressiveCarries: per90(s.progressive_carries, s.minutes),
-      dribblesCompleted: per90(s.dribbles_completed, s.minutes),
-      expectedAssists: per90(s.expected_assists, s.minutes),
-      shotCreatingActions: per90(s.shot_creating_actions, s.minutes),
-      tackles: per90(s.tackles, s.minutes),
-      interceptions: per90(s.interceptions, s.minutes),
-      pressures: per90(s.pressures, s.minutes),
+      creativity: s.creativity ?? 0,
+      threat: s.threat ?? 0,
+      influence: s.influence ?? 0,
+      productivity,
+      reliability,
     };
   });
 
-  const normPassingAccuracy = minMaxNormalize(stats.map((s) => s.passingAccuracy));
-  const normProgressivePasses = minMaxNormalize(stats.map((s) => s.progressivePasses));
-  const normProgressiveCarries = minMaxNormalize(stats.map((s) => s.progressiveCarries));
-  const normDribbles = minMaxNormalize(stats.map((s) => s.dribblesCompleted));
-  const normXA = minMaxNormalize(stats.map((s) => s.expectedAssists));
-  const normSCA = minMaxNormalize(stats.map((s) => s.shotCreatingActions));
-  const normTackles = minMaxNormalize(stats.map((s) => s.tackles));
-  const normInterceptions = minMaxNormalize(stats.map((s) => s.interceptions));
-  const normPressures = minMaxNormalize(stats.map((s) => s.pressures));
+  const nCreativity = minMaxNormalize(derived.map((d) => d.creativity));
+  const nThreat = minMaxNormalize(derived.map((d) => d.threat));
+  const nInfluence = minMaxNormalize(derived.map((d) => d.influence));
+  const nProductivity = minMaxNormalize(derived.map((d) => d.productivity));
+  const nReliability = minMaxNormalize(derived.map((d) => d.reliability));
 
   return rows.map((r, i) => ({
     id: r.id,
     name: r.name,
-    age: r.age,
-    cost: r.market_value,
+    cost: r.price,
     stats: {
-      passing: (normPassingAccuracy[i] + normProgressivePasses[i]) / 2,
-      dribbling: (normProgressiveCarries[i] + normDribbles[i]) / 2,
-      creativity: (normXA[i] + normSCA[i]) / 2,
-      defending: (normTackles[i] + normInterceptions[i]) / 2,
-      pressing: normPressures[i],
-      age: ageScore(r.age),
+      creativity: nCreativity[i],
+      threat: nThreat[i],
+      influence: nInfluence[i],
+      productivity: nProductivity[i],
+      reliability: nReliability[i],
     },
   }));
 }

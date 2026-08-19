@@ -20,9 +20,10 @@ import {
   WifiOff,
   ArrowLeftRight,
   X,
+  Info,
 } from "lucide-react";
 import { CLUBS as SAMPLE_CLUBS, POSITIONS, PLAYERS as SAMPLE_PLAYERS, PositionKey } from "@/lib/sampleData";
-import { METRICS, METRIC_LABELS, rankPlayers, Weights, Player } from "@/lib/scoring";
+import { METRICS, METRIC_LABELS, METRIC_HELP, rankPlayers, Weights, Player } from "@/lib/scoring";
 import { isSupabaseConfigured } from "@/lib/supabaseClient";
 import { getClubs, getClubWeights, getPlayersForPosition, ClubRow } from "@/lib/db";
 
@@ -36,7 +37,7 @@ const RANK_STYLES = [
 export default function Home() {
   const [clubs, setClubs] = useState<ClubRow[]>([]);
   const [clubKey, setClubKey] = useState<string>("");
-  const [posKey, setPosKey] = useState<PositionKey>("RW");
+  const [posKey, setPosKey] = useState<PositionKey>("MID");
   const [weights, setWeights] = useState<Weights | null>(null);
   const [players, setPlayers] = useState<Player[]>([]);
   const [selected, setSelected] = useState<string[]>([]);
@@ -137,12 +138,21 @@ export default function Home() {
             }`}
           >
             {isSupabaseConfigured ? <Database size={13} /> : <WifiOff size={13} />}
-            {isSupabaseConfigured ? "Live database" : "Sample data"}
+            {isSupabaseConfigured ? "Live database" : "Real 2024-25 season data"}
           </div>
         </div>
       </header>
 
       <div className="max-w-5xl mx-auto px-6 py-6">
+        {/* Plain-language explainer */}
+        <div className="flex items-start gap-2 bg-slate-900/40 border border-slate-800 rounded-lg px-3 py-2.5 mb-5 text-xs text-slate-400">
+          <Info size={14} className="mt-0.5 shrink-0" />
+          <p>
+            Pick a club and a position they need to fill. The sliders control what that club
+            values most — the ranked list re-scores every player live as you drag them.
+          </p>
+        </div>
+
         {error && (
           <div className="bg-red-950 border border-red-800 text-red-300 text-xs rounded-lg px-3 py-2 mb-5">
             {error}
@@ -151,53 +161,64 @@ export default function Home() {
 
         {/* Club / position controls */}
         <div className="flex gap-3 mb-6 flex-wrap">
-          <select
-            className="bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-pitch-500"
-            value={clubKey}
-            onChange={(e) => setClubKey(e.target.value)}
-          >
-            {clubs.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </select>
-          <select
-            className="bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-pitch-500"
-            value={posKey}
-            onChange={(e) => setPosKey(e.target.value as PositionKey)}
-          >
-            {Object.entries(POSITIONS).map(([key, label]) => (
-              <option key={key} value={key}>
-                {label}
-              </option>
-            ))}
-          </select>
-          <div className="relative flex-1 min-w-[180px]">
-            <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Filter by player name…"
-              className="w-full bg-slate-900 border border-slate-800 rounded-lg pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-pitch-500 placeholder:text-slate-600"
-            />
+          <div className="flex flex-col gap-1">
+            <label className="text-[11px] text-slate-500 uppercase tracking-wide">1. Club</label>
+            <select
+              className="bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-pitch-500"
+              value={clubKey}
+              onChange={(e) => setClubKey(e.target.value)}
+            >
+              {clubs.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="flex flex-col gap-1">
+            <label className="text-[11px] text-slate-500 uppercase tracking-wide">2. Position needed</label>
+            <select
+              className="bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-pitch-500"
+              value={posKey}
+              onChange={(e) => setPosKey(e.target.value as PositionKey)}
+            >
+              {Object.entries(POSITIONS).map(([key, label]) => (
+                <option key={key} value={key}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="flex flex-col gap-1 flex-1 min-w-[180px]">
+            <label className="text-[11px] text-slate-500 uppercase tracking-wide">Search</label>
+            <div className="relative">
+              <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Filter by player name…"
+                className="w-full bg-slate-900 border border-slate-800 rounded-lg pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-pitch-500 placeholder:text-slate-600"
+              />
+            </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] gap-5 items-start">
+        <div className="grid grid-cols-1 md:grid-cols-[300px_1fr] gap-5 items-start">
           {/* Weights */}
           <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-4">
-            <div className="flex items-center gap-2 mb-4 text-slate-400">
+            <div className="flex items-center gap-2 mb-1 text-slate-400">
               <SlidersHorizontal size={14} />
-              <h2 className="text-xs uppercase tracking-wide font-medium">Priority Weights</h2>
+              <h2 className="text-xs uppercase tracking-wide font-medium">3. What matters most?</h2>
             </div>
+            <p className="text-[11px] text-slate-600 mb-4">Drag to change {currentClubName || "the club"}'s priorities.</p>
             {weights &&
               METRICS.map((m) => (
-                <div key={m} className="mb-3.5">
-                  <div className="flex justify-between text-xs mb-1.5">
-                    <span className="text-slate-300">{METRIC_LABELS[m]}</span>
+                <div key={m} className="mb-4">
+                  <div className="flex justify-between text-xs mb-0.5">
+                    <span className="text-slate-200 font-medium">{METRIC_LABELS[m]}</span>
                     <span className="text-pitch-400 font-semibold tabular-nums">{weights[m]}%</span>
                   </div>
+                  <p className="text-[11px] text-slate-600 mb-1.5">{METRIC_HELP[m]}</p>
                   <input
                     type="range"
                     min={0}
@@ -213,19 +234,20 @@ export default function Home() {
               onClick={resetWeights}
             >
               <RefreshCw size={12} />
-              Reset to {currentClubName || "club"} default
+              Reset to default
             </button>
           </div>
 
           {/* Results */}
           <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-4">
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-1">
               <div className="flex items-center gap-2 text-slate-400">
                 <Users size={14} />
-                <h2 className="text-xs uppercase tracking-wide font-medium">Ranked Recommendations</h2>
+                <h2 className="text-xs uppercase tracking-wide font-medium">4. Ranked recommendations</h2>
               </div>
               <span className="text-xs text-slate-600">{filtered.length} players</span>
             </div>
+            <p className="text-[11px] text-slate-600 mb-4">Check up to 3 to compare side by side.</p>
 
             {loading && (
               <div className="space-y-2 animate-pulse">
@@ -245,8 +267,7 @@ export default function Home() {
                   <tr className="text-left text-slate-500 text-[11px] uppercase tracking-wide">
                     <th className="py-2 font-medium">#</th>
                     <th className="font-medium">Player</th>
-                    <th className="font-medium">Age</th>
-                    <th className="font-medium">Value</th>
+                    <th className="font-medium">Price</th>
                     <th className="font-medium">Fit Score</th>
                     <th className="font-medium">Compare</th>
                   </tr>
@@ -266,8 +287,7 @@ export default function Home() {
                         )}
                       </td>
                       <td className="font-medium text-slate-200">{p.name}</td>
-                      <td className="text-slate-400">{p.age}</td>
-                      <td className="text-slate-400">€{p.cost}m</td>
+                      <td className="text-slate-400">£{p.cost}m</td>
                       <td>
                         <div className="flex items-center gap-2">
                           <div className="w-24 h-1.5 bg-slate-800 rounded-full overflow-hidden">
@@ -305,7 +325,7 @@ export default function Home() {
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2 text-slate-400">
                 <ArrowLeftRight size={14} />
-                <h2 className="text-xs uppercase tracking-wide font-medium">Player Comparison</h2>
+                <h2 className="text-xs uppercase tracking-wide font-medium">5. Compare</h2>
               </div>
               <div className="flex gap-1.5 flex-wrap">
                 {comparePlayers.map((p, i) => (
@@ -344,7 +364,7 @@ export default function Home() {
         )}
 
         <p className="text-center text-slate-700 text-xs mt-8">
-          {isSupabaseConfigured ? "Connected to Supabase" : "Sample data mode"} · ScoutFit prototype
+          {isSupabaseConfigured ? "Connected to Supabase" : "Real 2024-25 Premier League stats · sample pool"} · ScoutFit prototype
         </p>
       </div>
     </main>
