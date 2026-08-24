@@ -1,7 +1,9 @@
 -- ScoutFit real-data seed (run AFTER schema.sql)
--- 84 real Premier League players, 2024-25 season, sourced from the public
--- vaastav/Fantasy-Premier-League dataset (mirrors the official FPL API).
--- "price" is an FPL game price in £m, not an official transfer valuation.
+-- 84 real Premier League players (2024-25 performance stats: goals,
+-- assists, minutes, creativity, influence, threat — from the public
+-- vaastav/Fantasy-Premier-League dataset) plus real current market
+-- values in EUR millions (from Transfermarkt data, Aug 2026). 12 clubs
+-- across the Premier League, La Liga, Bundesliga, Ligue 1, and Serie A.
 
 with inserted_clubs as (
   insert into clubs (name, league, tactical_style) values
@@ -9,7 +11,14 @@ with inserted_clubs as (
     ('Liverpool', 'Premier League', 'press'),
     ('Manchester City', 'Premier League', 'possession_control'),
     ('Manchester United', 'Premier League', 'direct'),
-    ('Chelsea', 'Premier League', 'young_dynamic')
+    ('Chelsea', 'Premier League', 'young_dynamic'),
+    ('FC Barcelona', 'La Liga', 'possession_control'),
+    ('Real Madrid', 'La Liga', 'galactico'),
+    ('Bayern Munich', 'Bundesliga', 'press'),
+    ('Paris Saint-Germain', 'Ligue 1', 'possession'),
+    ('Juventus FC', 'Serie A', 'defensive_control'),
+    ('Borussia Dortmund', 'Bundesliga', 'direct'),
+    ('Inter Milan', 'Serie A', 'defensive_control')
   returning id, name
 )
 insert into club_weights (club_id, position, creativity_weight, threat_weight, influence_weight, productivity_weight, reliability_weight)
@@ -41,94 +50,136 @@ select id, 'DEF', 15, 15, 25, 25, 20 from inserted_clubs where name = 'Chelsea'
 union all
 select id, 'MID', 30, 20, 15, 30, 5 from inserted_clubs where name = 'Chelsea'
 union all
-select id, 'FWD', 10, 40, 10, 40, 0 from inserted_clubs where name = 'Chelsea';
+select id, 'FWD', 10, 40, 10, 40, 0 from inserted_clubs where name = 'Chelsea'
+union all
+select id, 'DEF', 30, 0, 35, 5, 30 from inserted_clubs where name = 'FC Barcelona'
+union all
+select id, 'MID', 45, 5, 25, 10, 15 from inserted_clubs where name = 'FC Barcelona'
+union all
+select id, 'FWD', 25, 25, 20, 20, 10 from inserted_clubs where name = 'FC Barcelona'
+union all
+select id, 'DEF', 5, 20, 40, 15, 20 from inserted_clubs where name = 'Real Madrid'
+union all
+select id, 'MID', 20, 25, 30, 20, 5 from inserted_clubs where name = 'Real Madrid'
+union all
+select id, 'FWD', 0, 45, 25, 30, 0 from inserted_clubs where name = 'Real Madrid'
+union all
+select id, 'DEF', 5, 20, 35, 15, 25 from inserted_clubs where name = 'Bayern Munich'
+union all
+select id, 'MID', 20, 25, 25, 20, 10 from inserted_clubs where name = 'Bayern Munich'
+union all
+select id, 'FWD', 0, 45, 20, 30, 5 from inserted_clubs where name = 'Bayern Munich'
+union all
+select id, 'DEF', 25, 0, 35, 10, 30 from inserted_clubs where name = 'Paris Saint-Germain'
+union all
+select id, 'MID', 40, 5, 25, 15, 15 from inserted_clubs where name = 'Paris Saint-Germain'
+union all
+select id, 'FWD', 20, 25, 20, 25, 10 from inserted_clubs where name = 'Paris Saint-Germain'
+union all
+select id, 'DEF', 15, 0, 40, 5, 40 from inserted_clubs where name = 'Juventus FC'
+union all
+select id, 'MID', 30, 5, 30, 10, 25 from inserted_clubs where name = 'Juventus FC'
+union all
+select id, 'FWD', 10, 25, 25, 20, 20 from inserted_clubs where name = 'Juventus FC'
+union all
+select id, 'DEF', 5, 20, 30, 20, 25 from inserted_clubs where name = 'Borussia Dortmund'
+union all
+select id, 'MID', 20, 25, 20, 25, 10 from inserted_clubs where name = 'Borussia Dortmund'
+union all
+select id, 'FWD', 0, 45, 15, 35, 5 from inserted_clubs where name = 'Borussia Dortmund'
+union all
+select id, 'DEF', 15, 0, 40, 5, 40 from inserted_clubs where name = 'Inter Milan'
+union all
+select id, 'MID', 30, 5, 30, 10, 25 from inserted_clubs where name = 'Inter Milan'
+union all
+select id, 'FWD', 10, 25, 25, 20, 20 from inserted_clubs where name = 'Inter Milan';
 
 -- Players
 insert into players (name, club, position, price) values
-  ('W. Saliba', 'Arsenal', 'DEF', 6.4),
-  ('Gabriel Magalhães', 'Arsenal', 'DEF', 6.1),
-  ('Virgil van Dijk', 'Liverpool', 'DEF', 6.7),
-  ('Trent Alexander-Arnold', 'Liverpool', 'DEF', 7.2),
-  ('Joško Gvardiol', 'Manchester City', 'DEF', 6.5),
-  ('Rúben Dias', 'Manchester City', 'DEF', 5.5),
-  ('Marc Cucurella', 'Chelsea', 'DEF', 5.4),
-  ('Marc Guéhi', 'Crystal Palace', 'DEF', 4.7),
-  ('Milos Kerkez', 'Bournemouth', 'DEF', 5.3),
-  ('Ezri Konsa', 'Aston Villa', 'DEF', 4.5),
-  ('Pau Torres', 'Aston Villa', 'DEF', 4.2),
-  ('Matty Cash', 'Aston Villa', 'DEF', 4.4),
-  ('Lucas Digne', 'Aston Villa', 'DEF', 4.4),
-  ('Adam Smith', 'Bournemouth', 'DEF', 4.4),
-  ('Marcos Senesi', 'Bournemouth', 'DEF', 4.6),
-  ('Nathan Collins', 'Brentford', 'DEF', 4.6),
-  ('Ethan Pinnock', 'Brentford', 'DEF', 4.4),
-  ('Lewis Dunk', 'Brighton', 'DEF', 4.2),
-  ('Pervis Estupiñán', 'Brighton', 'DEF', 4.9),
-  ('Jan Paul van Hecke', 'Brighton', 'DEF', 4.5),
-  ('Daniel Muñoz', 'Crystal Palace', 'DEF', 5.2),
-  ('Tyrick Mitchell', 'Crystal Palace', 'DEF', 4.8),
-  ('James Tarkowski', 'Everton', 'DEF', 4.7),
-  ('Vitalii Mykolenko', 'Everton', 'DEF', 4.4),
-  ('Jarrad Branthwaite', 'Everton', 'DEF', 4.9),
-  ('Calvin Bassey', 'Fulham', 'DEF', 4.5),
-  ('Antonee Robinson', 'Fulham', 'DEF', 4.7),
-  ('Joachim Andersen', 'Fulham', 'DEF', 4.2),
-  ('Wout Faes', 'Leicester', 'DEF', 3.8),
-  ('James Justin', 'Leicester', 'DEF', 4.1),
-  ('Victor Kristiansen', 'Leicester', 'DEF', 4.4),
-  ('Mohamed Salah', 'Liverpool', 'MID', 13.6),
-  ('Cole Palmer', 'Chelsea', 'MID', 10.5),
-  ('Bruno Fernandes', 'Manchester United', 'MID', 8.4),
-  ('Bukayo Saka', 'Arsenal', 'MID', 10.4),
-  ('Martin Ødegaard', 'Arsenal', 'MID', 8.2),
-  ('Kevin De Bruyne', 'Manchester City', 'MID', 9.5),
-  ('Phil Foden', 'Manchester City', 'MID', 9.1),
-  ('Alexis Mac Allister', 'Liverpool', 'MID', 6.2),
-  ('Dominik Szoboszlai', 'Liverpool', 'MID', 6.1),
-  ('Youri Tielemans', 'Aston Villa', 'MID', 5.5),
-  ('John McGinn', 'Aston Villa', 'MID', 5.2),
-  ('Morgan Rogers', 'Aston Villa', 'MID', 5.8),
-  ('Justin Kluivert', 'Bournemouth', 'MID', 5.9),
-  ('Antoine Semenyo', 'Bournemouth', 'MID', 5.7),
-  ('Ryan Christie', 'Bournemouth', 'MID', 4.8),
-  ('Lewis Cook', 'Bournemouth', 'MID', 5),
-  ('Dango Ouattara', 'Bournemouth', 'MID', 4.5),
-  ('Keane Lewis-Potter', 'Brentford', 'MID', 5),
-  ('Bryan Mbeumo', 'Brentford', 'MID', 8.3),
-  ('Kevin Schade', 'Brentford', 'MID', 5.3),
-  ('Kaoru Mitoma', 'Brighton', 'MID', 6.3),
-  ('Yankuba Minteh', 'Brighton', 'MID', 4.8),
-  ('Georginio Rutter', 'Brighton', 'MID', 5),
-  ('Eberechi Eze', 'Crystal Palace', 'MID', 7),
-  ('Ismaïla Sarr', 'Crystal Palace', 'MID', 5.5),
-  ('Adam Wharton', 'Crystal Palace', 'MID', 4.7),
-  ('Abdoulaye Doucouré', 'Everton', 'MID', 5.1),
-  ('Idrissa Gueye', 'Everton', 'MID', 4.8),
-  ('Jack Harrison', 'Everton', 'MID', 5.2),
-  ('Dwight McNeil', 'Everton', 'MID', 5.1),
-  ('Alex Iwobi', 'Fulham', 'MID', 5.4),
-  ('Andreas Pereira', 'Fulham', 'MID', 4.9),
-  ('Emile Smith Rowe', 'Fulham', 'MID', 5),
-  ('Adama Traoré', 'Fulham', 'MID', 4.5),
-  ('Stephy Mavididi', 'Leicester', 'MID', 5),
-  ('Bilal El Khannouss', 'Leicester', 'MID', 4.8),
-  ('Erling Haaland', 'Manchester City', 'FWD', 14.9),
-  ('Ollie Watkins', 'Aston Villa', 'FWD', 9.2),
-  ('Kai Havertz', 'Arsenal', 'FWD', 7.7),
-  ('Nicolas Jackson', 'Chelsea', 'FWD', 7.7),
-  ('Yoane Wissa', 'Brentford', 'FWD', 6.9),
-  ('Danny Welbeck', 'Brighton', 'FWD', 5.5),
-  ('Jean-Philippe Mateta', 'Crystal Palace', 'FWD', 7.5),
-  ('Raúl Jiménez', 'Fulham', 'FWD', 5.3),
-  ('Rasmus Højlund', 'Manchester United', 'FWD', 6.9),
-  ('Jhon Durán', 'Aston Villa', 'FWD', 5.7),
-  ('Evanilson', 'Bournemouth', 'FWD', 5.9),
-  ('João Pedro', 'Brighton', 'FWD', 5.5),
-  ('Iliman Ndiaye', 'Everton', 'FWD', 5.2),
-  ('Dominic Calvert-Lewin', 'Everton', 'FWD', 5.4),
-  ('Rodrigo Muniz', 'Fulham', 'FWD', 5.5),
-  ('Jamie Vardy', 'Leicester', 'FWD', 5.4),
-  ('Patson Daka', 'Leicester', 'FWD', 4.8);
+  ('W. Saliba', 'Arsenal', 'DEF', 100),
+  ('Gabriel Magalhães', 'Arsenal', 'DEF', 75),
+  ('Virgil van Dijk', 'Liverpool', 'DEF', 15),
+  ('Trent Alexander-Arnold', 'Liverpool', 'DEF', 60),
+  ('Joško Gvardiol', 'Manchester City', 'DEF', 70),
+  ('Rúben Dias', 'Manchester City', 'DEF', 55),
+  ('Marc Cucurella', 'Chelsea', 'DEF', 50),
+  ('Marc Guéhi', 'Crystal Palace', 'DEF', 70),
+  ('Milos Kerkez', 'Bournemouth', 'DEF', 35),
+  ('Ezri Konsa', 'Aston Villa', 'DEF', 40),
+  ('Pau Torres', 'Aston Villa', 'DEF', 20),
+  ('Matty Cash', 'Aston Villa', 'DEF', 22),
+  ('Lucas Digne', 'Aston Villa', 'DEF', 6),
+  ('Adam Smith', 'Bournemouth', 'DEF', 0.3),
+  ('Marcos Senesi', 'Bournemouth', 'DEF', 25),
+  ('Nathan Collins', 'Brentford', 'DEF', 30),
+  ('Ethan Pinnock', 'Brentford', 'DEF', 3),
+  ('Lewis Dunk', 'Brighton', 'DEF', 3.5),
+  ('Pervis Estupiñán', 'Brighton', 'DEF', 12),
+  ('Jan Paul van Hecke', 'Brighton', 'DEF', 45),
+  ('Daniel Muñoz', 'Crystal Palace', 'DEF', 22),
+  ('Tyrick Mitchell', 'Crystal Palace', 'DEF', 25),
+  ('James Tarkowski', 'Everton', 'DEF', 5),
+  ('Vitalii Mykolenko', 'Everton', 'DEF', 25),
+  ('Jarrad Branthwaite', 'Everton', 'DEF', 40),
+  ('Calvin Bassey', 'Fulham', 'DEF', 28),
+  ('Antonee Robinson', 'Fulham', 'DEF', 22),
+  ('Joachim Andersen', 'Fulham', 'DEF', 20),
+  ('Wout Faes', 'Leicester', 'DEF', 10),
+  ('James Justin', 'Leicester', 'DEF', 12),
+  ('Victor Kristiansen', 'Leicester', 'DEF', 9),
+  ('Mohamed Salah', 'Liverpool', 'MID', 22),
+  ('Cole Palmer', 'Chelsea', 'MID', 100),
+  ('Bruno Fernandes', 'Manchester United', 'MID', 35),
+  ('Bukayo Saka', 'Arsenal', 'MID', 110),
+  ('Martin Ødegaard', 'Arsenal', 'MID', 65),
+  ('Kevin De Bruyne', 'Manchester City', 'MID', 8),
+  ('Phil Foden', 'Manchester City', 'MID', 70),
+  ('Alexis Mac Allister', 'Liverpool', 'MID', 70),
+  ('Dominik Szoboszlai', 'Liverpool', 'MID', 100),
+  ('Youri Tielemans', 'Aston Villa', 'MID', 30),
+  ('John McGinn', 'Aston Villa', 'MID', 13),
+  ('Morgan Rogers', 'Aston Villa', 'MID', 90),
+  ('Justin Kluivert', 'Bournemouth', 'MID', 25),
+  ('Antoine Semenyo', 'Bournemouth', 'MID', 80),
+  ('Ryan Christie', 'Bournemouth', 'MID', 8),
+  ('Lewis Cook', 'Bournemouth', 'MID', 11),
+  ('Dango Ouattara', 'Bournemouth', 'MID', 35),
+  ('Keane Lewis-Potter', 'Brentford', 'MID', 25),
+  ('Bryan Mbeumo', 'Brentford', 'MID', 75),
+  ('Kevin Schade', 'Brentford', 'MID', 35),
+  ('Kaoru Mitoma', 'Brighton', 'MID', 22),
+  ('Yankuba Minteh', 'Brighton', 'MID', 45),
+  ('Georginio Rutter', 'Brighton', 'MID', 30),
+  ('Eberechi Eze', 'Crystal Palace', 'MID', 65),
+  ('Ismaïla Sarr', 'Crystal Palace', 'MID', 40),
+  ('Adam Wharton', 'Crystal Palace', 'MID', 70),
+  ('Abdoulaye Doucouré', 'Everton', 'MID', 5),
+  ('Idrissa Gueye', 'Everton', 'MID', 0.5),
+  ('Jack Harrison', 'Everton', 'MID', 6.5),
+  ('Dwight McNeil', 'Everton', 'MID', 18),
+  ('Alex Iwobi', 'Fulham', 'MID', 20),
+  ('Andreas Pereira', 'Fulham', 'MID', 14),
+  ('Emile Smith Rowe', 'Fulham', 'MID', 20),
+  ('Adama Traoré', 'Fulham', 'MID', 6),
+  ('Stephy Mavididi', 'Leicester', 'MID', 8),
+  ('Bilal El Khannouss', 'Leicester', 'MID', 35),
+  ('Erling Haaland', 'Manchester City', 'FWD', 200),
+  ('Ollie Watkins', 'Aston Villa', 'FWD', 25),
+  ('Kai Havertz', 'Arsenal', 'FWD', 55),
+  ('Nicolas Jackson', 'Chelsea', 'FWD', 40),
+  ('Yoane Wissa', 'Brentford', 'FWD', 25),
+  ('Danny Welbeck', 'Brighton', 'FWD', 3),
+  ('Jean-Philippe Mateta', 'Crystal Palace', 'FWD', 30),
+  ('Raúl Jiménez', 'Fulham', 'FWD', 3),
+  ('Rasmus Højlund', 'Manchester United', 'FWD', 60),
+  ('Jhon Durán', 'Aston Villa', 'FWD', 15),
+  ('Evanilson', 'Bournemouth', 'FWD', 35),
+  ('João Pedro', 'Brighton', 'FWD', 80),
+  ('Iliman Ndiaye', 'Everton', 'FWD', 55),
+  ('Dominic Calvert-Lewin', 'Everton', 'FWD', 22),
+  ('Rodrigo Muniz', 'Fulham', 'FWD', 20),
+  ('Jamie Vardy', 'Leicester', 'FWD', 1),
+  ('Patson Daka', 'Leicester', 'FWD', 0.4);
 
 -- Player stats (2024-2025 season)
 insert into player_stats (player_id, season, minutes, goals_scored, assists, creativity, influence, threat)

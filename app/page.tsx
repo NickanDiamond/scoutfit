@@ -381,7 +381,7 @@ export default function Home() {
                           )}
                         </td>
                         <td className="font-medium text-slate-200">{p.name}</td>
-                        <td className="text-slate-400">£{p.cost}m</td>
+                        <td className="text-slate-400">€{p.cost}m</td>
                         <td>
                           <div className="flex items-center gap-2">
                             <div className="w-24 h-1.5 bg-slate-800 rounded-full overflow-hidden">

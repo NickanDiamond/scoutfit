@@ -6,17 +6,22 @@ a database.
 
 ## Real data, not fictional players
 
-The sample pool (84 players: 31 defenders, 36 midfielders, 17 forwards) is
-real 2024-25 Premier League season data — goals, assists, minutes,
-creativity, influence, threat, and FPL price — sourced from the public
-[vaastav/Fantasy-Premier-League](https://github.com/vaastav/Fantasy-Premier-League)
-dataset, which mirrors the official Fantasy Premier League API. "Price" is
-an FPL game price, not an official transfer valuation — treat it as a
-rough proxy, not gospel.
+The sample pool (84 players: 31 defenders, 36 midfielders, 17 forwards) uses
+two real data sources:
 
-The 5 clubs (Arsenal, Liverpool, Manchester City, Manchester United,
-Chelsea) have illustrative tactical-style weight profiles per position —
-these are reasonable characterizations, not official club data.
+- Performance stats (goals, assists, minutes, creativity, influence,
+  threat) — 2024-25 Premier League season, from the public
+  [vaastav/Fantasy-Premier-League](https://github.com/vaastav/Fantasy-Premier-League)
+  dataset (mirrors the official FPL API).
+- Prices — real current market values in €m, from Transfermarkt data
+  (Aug 2026), matched to each player by name. These are actual transfer
+  valuations, not a fantasy-game price.
+
+The 12 clubs (Arsenal, Liverpool, Manchester City, Manchester United,
+Chelsea, FC Barcelona, Real Madrid, Bayern Munich, Paris Saint-Germain,
+Juventus, Borussia Dortmund, Inter Milan) have illustrative tactical-style
+weight profiles per position — these are reasonable characterizations,
+not official club data.
 
 ## Run it locally
 

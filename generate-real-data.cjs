@@ -10,6 +10,97 @@ const clip = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 const POSITIONS = { DEF: "Defender", MID: "Midfielder", FWD: "Forward" };
 const FULL_SEASON_MINUTES = 3420;
 
+// Real current market values (€m), from Transfermarkt data (players.csv /
+// player_valuations.csv, dated Aug 2026). Matched by name to the FPL
+// performance-stat rows above.
+const REAL_MARKET_VALUES = {
+  "W. Saliba": 100.0,
+  "Gabriel Magalhães": 75.0,
+  "Virgil van Dijk": 15.0,
+  "Trent Alexander-Arnold": 60.0,
+  "Joško Gvardiol": 70.0,
+  "Rúben Dias": 55.0,
+  "Marc Cucurella": 50.0,
+  "Marc Guéhi": 70.0,
+  "Milos Kerkez": 35.0,
+  "Ezri Konsa": 40.0,
+  "Pau Torres": 20.0,
+  "Matty Cash": 22.0,
+  "Lucas Digne": 6.0,
+  "Adam Smith": 0.3,
+  "Marcos Senesi": 25.0,
+  "Nathan Collins": 30.0,
+  "Ethan Pinnock": 3.0,
+  "Lewis Dunk": 3.5,
+  "Pervis Estupiñán": 12.0,
+  "Jan Paul van Hecke": 45.0,
+  "Daniel Muñoz": 22.0,
+  "Tyrick Mitchell": 25.0,
+  "James Tarkowski": 5.0,
+  "Vitalii Mykolenko": 25.0,
+  "Jarrad Branthwaite": 40.0,
+  "Calvin Bassey": 28.0,
+  "Antonee Robinson": 22.0,
+  "Joachim Andersen": 20.0,
+  "Wout Faes": 10.0,
+  "James Justin": 12.0,
+  "Victor Kristiansen": 9.0,
+  "Mohamed Salah": 22.0,
+  "Cole Palmer": 100.0,
+  "Bruno Fernandes": 35.0,
+  "Bukayo Saka": 110.0,
+  "Martin Ødegaard": 65.0,
+  "Kevin De Bruyne": 8.0,
+  "Phil Foden": 70.0,
+  "Alexis Mac Allister": 70.0,
+  "Dominik Szoboszlai": 100.0,
+  "Youri Tielemans": 30.0,
+  "John McGinn": 13.0,
+  "Morgan Rogers": 90.0,
+  "Justin Kluivert": 25.0,
+  "Antoine Semenyo": 80.0,
+  "Ryan Christie": 8.0,
+  "Lewis Cook": 11.0,
+  "Dango Ouattara": 35.0,
+  "Keane Lewis-Potter": 25.0,
+  "Bryan Mbeumo": 75.0,
+  "Kevin Schade": 35.0,
+  "Kaoru Mitoma": 22.0,
+  "Yankuba Minteh": 45.0,
+  "Georginio Rutter": 30.0,
+  "Eberechi Eze": 65.0,
+  "Ismaïla Sarr": 40.0,
+  "Adam Wharton": 70.0,
+  "Abdoulaye Doucouré": 5.0,
+  "Idrissa Gueye": 0.5,
+  "Jack Harrison": 6.5,
+  "Dwight McNeil": 18.0,
+  "Alex Iwobi": 20.0,
+  "Andreas Pereira": 14.0,
+  "Emile Smith Rowe": 20.0,
+  "Adama Traoré": 6.0,
+  "Stephy Mavididi": 8.0,
+  "Bilal El Khannouss": 35.0,
+  "Erling Haaland": 200.0,
+  "Ollie Watkins": 25.0,
+  "Kai Havertz": 55.0,
+  "Nicolas Jackson": 40.0,
+  "Yoane Wissa": 25.0,
+  "Danny Welbeck": 3.0,
+  "Jean-Philippe Mateta": 30.0,
+  "Raúl Jiménez": 3.0,
+  "Rasmus Højlund": 60.0,
+  "Jhon Durán": 15.0,
+  "Evanilson": 35.0,
+  "João Pedro": 80.0,
+  "Iliman Ndiaye": 55.0,
+  "Dominic Calvert-Lewin": 22.0,
+  "Rodrigo Muniz": 20.0,
+  "Jamie Vardy": 1.0,
+  "Patson Daka": 0.4,
+};
+
+
 // [name, club, goals, assists, minutes, creativity, influence, threat, now_cost(tenths of £m)]
 const RAW = {
   DEF: [
@@ -131,7 +222,7 @@ Object.keys(POSITIONS).forEach((pos) => {
   PLAYERS[pos] = rows.map((r, i) => ({
     name: r[0],
     club: r[1],
-    cost: Math.round((r[8] / 10) * 10) / 10,
+    cost: REAL_MARKET_VALUES[r[0]] ?? Math.round((r[8] / 10) * 10) / 10, // real €m market value, FPL price as fallback
     raw: { minutes: r[4], goals: r[2], assists: r[3], creativity: r[5], influence: r[6], threat: r[7] },
     stats: {
       creativity: Math.round(n.creativity[i]),
@@ -149,11 +240,18 @@ const BASE_WEIGHTS = {
   FWD: { creativity: 10, threat: 35, influence: 15, productivity: 30, reliability: 10 },
 };
 const CLUB_LIST = [
-  { key: "arsenal", name: "Arsenal", style: "possession" },
-  { key: "liverpool", name: "Liverpool", style: "press" },
-  { key: "mancity", name: "Manchester City", style: "possession_control" },
-  { key: "manutd", name: "Manchester United", style: "direct" },
-  { key: "chelsea", name: "Chelsea", style: "young_dynamic" },
+  { key: "arsenal", name: "Arsenal", league: "Premier League", style: "possession" },
+  { key: "liverpool", name: "Liverpool", league: "Premier League", style: "press" },
+  { key: "mancity", name: "Manchester City", league: "Premier League", style: "possession_control" },
+  { key: "manutd", name: "Manchester United", league: "Premier League", style: "direct" },
+  { key: "chelsea", name: "Chelsea", league: "Premier League", style: "young_dynamic" },
+  { key: "barcelona", name: "FC Barcelona", league: "La Liga", style: "possession_control" },
+  { key: "realmadrid", name: "Real Madrid", league: "La Liga", style: "galactico" },
+  { key: "bayern", name: "Bayern Munich", league: "Bundesliga", style: "press" },
+  { key: "psg", name: "Paris Saint-Germain", league: "Ligue 1", style: "possession" },
+  { key: "juventus", name: "Juventus FC", league: "Serie A", style: "defensive_control" },
+  { key: "dortmund", name: "Borussia Dortmund", league: "Bundesliga", style: "direct" },
+  { key: "intermilan", name: "Inter Milan", league: "Serie A", style: "defensive_control" },
 ];
 const STYLE_DELTAS = {
   possession: { creativity: 10, influence: 5, threat: -10, productivity: -5 },
@@ -161,6 +259,8 @@ const STYLE_DELTAS = {
   possession_control: { creativity: 15, influence: 5, threat: -10, productivity: -10 },
   direct: { threat: 10, productivity: 5, creativity: -10, reliability: -5 },
   young_dynamic: { productivity: 10, threat: 5, reliability: -10, influence: -5 },
+  galactico: { threat: 10, influence: 10, reliability: -10, creativity: -10 },
+  defensive_control: { influence: 10, reliability: 10, threat: -10, productivity: -10 },
 };
 function buildWeights(position, style) {
   const base = BASE_WEIGHTS[position];
@@ -221,14 +321,16 @@ require("fs").writeFileSync("lib/sampleData.ts", ts);
 function sqlStr(s) { return `'${String(s).replace(/'/g, "''")}'`; }
 
 let sql = `-- ScoutFit real-data seed (run AFTER schema.sql)
--- 84 real Premier League players, 2024-25 season, sourced from the public
--- vaastav/Fantasy-Premier-League dataset (mirrors the official FPL API).
--- "price" is an FPL game price in £m, not an official transfer valuation.
+-- 84 real Premier League players (2024-25 performance stats: goals,
+-- assists, minutes, creativity, influence, threat — from the public
+-- vaastav/Fantasy-Premier-League dataset) plus real current market
+-- values in EUR millions (from Transfermarkt data, Aug 2026). 12 clubs
+-- across the Premier League, La Liga, Bundesliga, Ligue 1, and Serie A.
 
 with inserted_clubs as (
   insert into clubs (name, league, tactical_style) values
 `;
-sql += CLUB_LIST.map((c) => `    (${sqlStr(c.name)}, 'Premier League', ${sqlStr(c.style)})`).join(",\n") + "\n";
+sql += CLUB_LIST.map((c) => `    (${sqlStr(c.name)}, ${sqlStr(c.league)}, ${sqlStr(c.style)})`).join(",\n") + "\n";
 sql += `  returning id, name
 )
 insert into club_weights (club_id, position, creativity_weight, threat_weight, influence_weight, productivity_weight, reliability_weight)

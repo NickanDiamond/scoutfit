@@ -16,7 +16,7 @@ create table players (
   name text not null,
   club text,
   position text,           -- 'DEF' | 'MID' | 'FWD'
-  price numeric,            -- FPL-style price in £m (not an official valuation)
+  price numeric,            -- real market value in €m (Transfermarkt, Aug 2026)
   created_at timestamptz default now()
 );
 
