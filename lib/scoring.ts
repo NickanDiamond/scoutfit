@@ -94,3 +94,11 @@ export function equalWeights(selected: Metric[]): Weights {
 export function topMetrics(weights: Weights, n = 2): Metric[] {
   return [...METRICS].sort((a, b) => weights[b] - weights[a]).slice(0, n);
 }
+
+// Fit points per €m spent (a +1 floor keeps very cheap players from
+// producing wild ratios via near-zero division). Used for a "best value"
+// ranking mode, so a cheap specialist can outrank a pricier all-rounder
+// who's only marginally better on raw fit.
+export function valueRatio(score: number, cost: number): number {
+  return score / (cost + 1);
+}

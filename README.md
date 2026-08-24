@@ -68,7 +68,7 @@ not official club data.
 
 - `lib/scoring.ts` — `minMaxNormalize` (scales raw numbers to 0-100),
   `fitScore`/`rankPlayers` (weighted sum of a player's 5 normalized
-  dimensions).
+  dimensions), `valueRatio` (fit points per €m spent).
 - `lib/db.ts` — `getPlayersForPosition` fetches raw stats from
   `player_stats`, derives output (goals+assists per 90) and reliability
   (minutes vs. a full season), then min-max normalizes all 5 dimensions
@@ -76,6 +76,17 @@ not official club data.
 - `lib/sampleData.ts` — the real offline data described above, generated
   by `node generate-real-data.cjs` (edit the RAW stats there to refresh
   or expand it).
+
+### Value-for-money mode
+
+A weighted sum of correlated "how good is this player overall" stats
+tends to always surface the same handful of superstars, since an
+all-around great player scores well on every dimension at once — it
+doesn't reward a specialist who's elite at just the 1-2 things you
+picked. The "Prioritize value for money" toggle on the stats step
+re-sorts by `valueRatio` (fit score ÷ price) instead of raw fit score,
+so a cheap player who nails your priorities can outrank an expensive
+all-rounder who's only marginally better at them.
 
 ## Next steps
 

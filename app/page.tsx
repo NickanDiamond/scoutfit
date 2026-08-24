@@ -30,6 +30,7 @@ import {
   rankPlayers,
   equalWeights,
   topMetrics,
+  valueRatio,
   Weights,
   Player,
 } from "@/lib/scoring";
@@ -59,6 +60,7 @@ export default function Home() {
   const [posKey, setPosKey] = useState<PositionKey | null>(null);
   const [defaultWeights, setDefaultWeights] = useState<Weights | null>(null);
   const [selectedStats, setSelectedStats] = useState<Metric[]>([]);
+  const [valueMode, setValueMode] = useState(false);
   const [players, setPlayers] = useState<Player[]>([]);
   const [selected, setSelected] = useState<string[]>([]);
   const [query, setQuery] = useState("");
@@ -122,6 +124,7 @@ export default function Home() {
     setClubKey("");
     setPosKey(null);
     setSelectedStats([]);
+    setValueMode(false);
     setSelected([]);
     setQuery("");
   }
@@ -132,7 +135,13 @@ export default function Home() {
   }
 
   const weights = useMemo(() => equalWeights(selectedStats), [selectedStats]);
-  const ranked = useMemo(() => rankPlayers(players, weights), [players, weights]);
+  const ranked = useMemo(() => {
+    const byFit = rankPlayers(players, weights);
+    if (!valueMode) return byFit;
+    return [...byFit].sort(
+      (a, b) => valueRatio(b.score, b.cost) - valueRatio(a.score, a.cost)
+    );
+  }, [players, weights, valueMode]);
   const filtered = useMemo(
     () => ranked.filter((p) => p.name.toLowerCase().includes(query.toLowerCase())),
     [ranked, query]
@@ -299,6 +308,31 @@ export default function Home() {
                 );
               })}
             </div>
+
+            <button
+              onClick={() => setValueMode((v) => !v)}
+              className={`w-full flex items-center gap-3 border rounded-xl p-3.5 text-left transition-colors mb-6 ${
+                valueMode
+                  ? "border-pitch-500 bg-pitch-500/10"
+                  : "border-slate-800 bg-slate-900/60 hover:border-slate-700"
+              }`}
+            >
+              <span
+                className={`w-5 h-5 rounded border flex items-center justify-center shrink-0 ${
+                  valueMode ? "bg-pitch-500 border-pitch-500 text-slate-950" : "border-slate-700"
+                }`}
+              >
+                {valueMode && <Check size={12} />}
+              </span>
+              <span>
+                <span className="font-medium text-slate-100">Prioritize value for money</span>
+                <span className="text-slate-500 text-xs block">
+                  Rank by fit-per-euro instead of raw fit — surfaces cheaper specialists over
+                  expensive all-rounders who are only marginally better.
+                </span>
+              </span>
+            </button>
+
             <button
               onClick={showResults}
               disabled={selectedStats.length === 0}
@@ -324,7 +358,8 @@ export default function Home() {
               </button>
             </div>
             <p className="text-slate-500 text-sm mb-6">
-              Ranked by {selectedStats.map((m) => METRIC_LABELS[m]).join(", ")}.
+              Ranked by {selectedStats.map((m) => METRIC_LABELS[m]).join(", ")}
+              {valueMode && " — sorted for best value, not just raw fit"}.
             </p>
 
             <div className="relative mb-4">
@@ -363,6 +398,7 @@ export default function Home() {
                       <th className="font-medium">Player</th>
                       <th className="font-medium">Price</th>
                       <th className="font-medium">Fit Score</th>
+                      <th className="font-medium">{valueMode ? "Value" : ""}</th>
                       <th className="font-medium">Compare</th>
                     </tr>
                   </thead>
@@ -392,6 +428,9 @@ export default function Home() {
                             </div>
                             <span className="font-semibold tabular-nums text-slate-200 w-9">{p.score.toFixed(1)}</span>
                           </div>
+                        </td>
+                        <td className="text-xs text-slate-400 tabular-nums">
+                          {valueMode ? `${valueRatio(p.score, p.cost).toFixed(1)} pts/€m` : ""}
                         </td>
                         <td>
                           <button
