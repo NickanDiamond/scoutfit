@@ -6,16 +6,19 @@ a database.
 
 ## Real data, not fictional players
 
-The sample pool (90 players) uses two real data sources:
+The sample pool (88 players) uses two real data sources:
 
-- Performance stats (goals, assists, minutes, creativity, influence,
-  threat) — 2024-25 Premier League season, from the public
-  [vaastav/Fantasy-Premier-League](https://github.com/vaastav/Fantasy-Premier-League)
-  dataset (mirrors the official FPL API).
+- Ratings — real **EA Sports FC 26** player ratings: Pace, Shooting,
+  Passing, Dribbling, Defending, Physical (EA's own six-stat "pentagon"),
+  plus Age. Matched by name to each real player from EA's official
+  ratings data.
 - Prices and positions — real current market values in €m, and each
-  player's actual sub-position, from Transfermarkt data (Aug 2026),
-  matched to each player by name. Prices are real transfer valuations,
-  not a fantasy-game price.
+  player's actual sub-position, from Transfermarkt data, matched by
+  name. Prices are real transfer valuations, not a fantasy-game price.
+
+2 players from an earlier version of the pool (Andreas Pereira, Jamie
+Vardy) were dropped — they don't have EA FC 26 ratings, so there was no
+real data to give them instead of faking it.
 
 The 12 clubs (Arsenal, Liverpool, Manchester City, Manchester United,
 Chelsea, FC Barcelona, Real Madrid, Bayern Munich, Paris Saint-Germain,
@@ -43,16 +46,21 @@ instead of a coarse Defender/Midfielder/Forward split.
 One honest limitation: **there's no "False Nine" / Second Striker
 bucket.** Checked directly against the real data — zero current Premier
 League players are tagged that position. Rather than fake a populated
-category, it's left out; a false nine's skill set (creativity + threat,
-low reliance on aerial/target-man reliability) is best approximated
-today by ranking a Striker or Attacking Midfielder with Creativity and
-Threat pulled to the top of the stats ranking.
+category, it's left out; a false nine's skill set (Dribbling + Shooting,
+lower reliance on Physical/aerial presence) is best approximated today
+by ranking a Striker or Attacking Midfielder with Dribbling and Shooting
+pulled to the top of the stats ranking.
+
+Central Midfielder is also a thinner bucket (5 real players) after the
+EA FC 26 data swap dropped one unmatched name — same principle: real
+data only, no filler.
 
 ## How it's simplified
 
-- **5 scoring dimensions**, each with a one-line explanation: Creativity,
-  Threat, Influence, Output (goals+assists per 90), Reliability (minutes
-  played vs. a full season). No fabricated passing/dribbling numbers.
+- **7 scoring dimensions**, each with a one-line explanation: Pace,
+  Shooting, Passing, Dribbling, Defending, Physical (EA Sports FC's own
+  pentagon), and Youth (age, flipped so younger scores higher). No
+  fabricated stats — these are real player ratings.
 - **A step-by-step wizard** instead of one dense dashboard: pick a club,
   pick the position they need, drag-to-rank which stats matter most
   (rank 1 carries the most weight, pre-ordered to that club's usual
@@ -65,60 +73,72 @@ Threat pulled to the top of the stats ranking.
 2. Paste `supabase/schema.sql` into the SQL editor and run it. It creates:
    `clubs`, `players`, `player_stats`, `club_weights`, `saved_analyses`.
 3. Paste `supabase/seed.sql` into a new query and run it — this loads the
-   same 90 real players (and matching club_weights) used in the offline
+   same 88 real players (and matching club_weights) used in the offline
    sample, so your database starts non-empty. Both files are generated
    together by `node generate-real-data.cjs`.
 4. Copy `.env.local.example` to `.env.local` and fill in your project URL
    and anon key (Project Settings → API).
 5. Restart `npm run dev` — the badge switches to "Live database" once
    real env vars are detected.
-6. To grow past 90 players: add more rows to the `RAW` object in
+6. To grow past 88 players: add more rows to the `RAW` object in
    `generate-real-data.cjs` (same real-data source, more clubs/players),
    regenerate, and re-run the new `supabase/seed.sql`.
-7. **If you're upgrading from an earlier version with the old 3-position
-   DEF/MID/FWD scheme**, your existing Supabase data uses the old
-   position codes. Run `truncate table clubs, players cascade;` in the
-   SQL editor first, then paste and run the new `supabase/seed.sql` to
-   replace it with the 7-position real data.
+7. **If you're upgrading from an earlier version** (either the old
+   3-position DEF/MID/FWD scheme, or the previous 7-position version
+   with FPL-derived stats), the column names in `player_stats` and
+   `club_weights` have changed (pace/shooting/passing/... instead of
+   creativity/threat/influence/...). Drop and recreate everything:
+   ```sql
+   drop table if exists saved_analyses, player_stats, club_weights, players, clubs cascade;
+   ```
+   then paste and run the new `supabase/schema.sql`, then the new
+   `supabase/seed.sql`.
 
 ## How the scoring works
 
 - `lib/scoring.ts` — `minMaxNormalize` (scales raw numbers to 0-100),
-  `fitScore`/`rankPlayers` (weighted sum of a player's 5 normalized
+  `fitScore`/`rankPlayers` (weighted sum of a player's 7 normalized
   dimensions), `rankToWeights` (turns a drag-to-rank order into
-  descending weights — rank 1 gets the biggest share), `valueRatio` (fit
-  points per €m spent).
-- `lib/db.ts` — `getPlayersForPosition` fetches raw stats from
-  `player_stats`, derives output (goals+assists per 90) and reliability
-  (minutes vs. a full season), then min-max normalizes all 5 dimensions
-  across the fetched pool.
+  descending weights — rank 1 gets the biggest share), `valueScores`
+  (percentile-based value-for-money — see below).
+- `lib/db.ts` — `getPlayersForPosition` fetches raw ratings from
+  `player_stats`, derives youth (age flipped), then min-max normalizes
+  all 7 dimensions across the fetched pool.
 - `lib/sampleData.ts` — the real offline data described above, generated
   by `node generate-real-data.cjs` (edit the RAW stats there to refresh
   or expand it).
 
-### Value-for-money mode
+### Value-for-money mode (fixed)
 
-A weighted sum of correlated "how good is this player overall" stats
-tends to always surface the same handful of superstars, since an
-all-around great player scores well on every dimension at once — it
-doesn't reward a specialist who's elite at just the 1-2 things you
-picked. The "Prioritize value for money" toggle on the stats step
-re-sorts by `valueRatio` (fit score ÷ price) instead of raw fit score,
-so a cheap player who nails your priorities can outrank an expensive
-all-rounder who's only marginally better at them.
+The first version of this used `score / cost` directly in euros. That
+was a bug in practice: real transfer prices span about €0.3m to €200m
+(a ~600x range) while fit scores only span roughly 20-80 points (a ~4x
+range), so dividing by raw cost meant price completely dominated —
+"value mode" was effectively just sorting cheapest-first, barely
+touched by how good the fit actually was.
+
+The fix (`percentileRanks` + `valueScores` in `lib/scoring.ts`):
+convert both fit score and cost to a percentile rank *within the
+current results pool* (0-100, 100 = best fit / most expensive), then
+`value = fitPercentile - costPercentile`. A player who fits better than
+their price tag suggests scores well and positive; a star who's both
+the best fit and the most expensive nets out near zero — "performing
+about as well as you'd expect for the price," not penalized just for
+being expensive. This is what actually surfaces a cheap specialist who
+overperforms their price tag, the original goal of this mode.
 
 ### Drag-to-rank stats
 
 Instead of equal-weight checkboxes, the stats step is a draggable
-ordered list of all 5 dimensions. Order determines weight — the top
+ordered list of all 7 dimensions. Order determines weight — the top
 stat gets the largest share, the bottom stat the smallest — via
 `rankToWeights` in `lib/scoring.ts`. Arrow buttons are included next to
 each row as a non-drag fallback (keyboard/touch friendly).
 
 ## Next steps
 
-- Backfill thinner position buckets (Central Midfield, Defensive
-  Midfielder) with more real players from the same free datasets.
+- Backfill the thinner Central Midfielder bucket with more real EA FC 26
+  players.
 - Hand-write real `club_weights` rows once you're on Supabase.
 - Add a player detail view / saved_analyses persistence for logged-in users.
 - Deploy to Vercel — add the same env vars in the project settings there.

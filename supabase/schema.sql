@@ -1,7 +1,7 @@
 -- ScoutFit database schema (run in Supabase SQL editor)
--- Metrics match what's actually available from free player data (FPL-style
--- stats): creativity, threat, influence, goals/assists, minutes. No
--- invented passing/dribbling numbers.
+-- Metrics are EA Sports FC 26's own six-stat "pentagon" (pace, shooting,
+-- passing, dribbling, defending, physical) plus age — real ratings, not
+-- invented numbers.
 
 create table clubs (
   id uuid primary key default gen_random_uuid(),
@@ -23,24 +23,27 @@ create table players (
 create table player_stats (
   id uuid primary key default gen_random_uuid(),
   player_id uuid references players(id) on delete cascade,
-  season text,
-  minutes int,
-  goals_scored numeric,
-  assists numeric,
-  creativity numeric,
-  influence numeric,
-  threat numeric
+  season text,               -- 'FC26' (EA Sports FC 26 ratings edition)
+  pace numeric,
+  shooting numeric,
+  passing numeric,
+  dribbling numeric,
+  defending numeric,
+  physical numeric,
+  age numeric
 );
 
 create table club_weights (
   id uuid primary key default gen_random_uuid(),
   club_id uuid references clubs(id) on delete cascade,
   position text not null,   -- 'CB' | 'FB' | 'DM' | 'CM' | 'CAM' | 'WING' | 'ST'
-  creativity_weight numeric,
-  threat_weight numeric,
-  influence_weight numeric,
-  productivity_weight numeric,
-  reliability_weight numeric
+  pace_weight numeric,
+  shooting_weight numeric,
+  passing_weight numeric,
+  dribbling_weight numeric,
+  defending_weight numeric,
+  physical_weight numeric,
+  youth_weight numeric
 );
 
 create table saved_analyses (

@@ -32,7 +32,7 @@ import {
   Metric,
   rankPlayers,
   rankToWeights,
-  valueRatio,
+  valueScores,
   Weights,
   Player,
 } from "@/lib/scoring";
@@ -166,13 +166,19 @@ export default function Home() {
   }
 
   const weights = useMemo(() => rankToWeights(rankedStats), [rankedStats]);
+  const byFit = useMemo(() => rankPlayers(players, weights), [players, weights]);
+  const valueByName = useMemo(() => {
+    const scores = valueScores(byFit);
+    const m = new Map<string, number>();
+    byFit.forEach((p, i) => m.set(p.name, scores[i]));
+    return m;
+  }, [byFit]);
   const ranked = useMemo(() => {
-    const byFit = rankPlayers(players, weights);
     if (!valueMode) return byFit;
     return [...byFit].sort(
-      (a, b) => valueRatio(b.score, b.cost) - valueRatio(a.score, a.cost)
+      (a, b) => (valueByName.get(b.name) ?? 0) - (valueByName.get(a.name) ?? 0)
     );
-  }, [players, weights, valueMode]);
+  }, [byFit, valueByName, valueMode]);
   const filtered = useMemo(
     () => ranked.filter((p) => p.name.toLowerCase().includes(query.toLowerCase())),
     [ranked, query]
@@ -379,8 +385,8 @@ export default function Home() {
               <span>
                 <span className="font-medium text-slate-100">Prioritize value for money</span>
                 <span className="text-slate-500 text-xs block">
-                  Rank by fit-per-euro instead of raw fit — surfaces cheaper specialists over
-                  expensive all-rounders who are only marginally better.
+                  Rank by fit-vs-price, not raw fit — rewards a player who outperforms their
+                  price tag over a similarly-good star who costs far more.
                 </span>
               </span>
             </button>
@@ -481,7 +487,9 @@ export default function Home() {
                           </div>
                         </td>
                         <td className="text-xs text-slate-400 tabular-nums">
-                          {valueMode ? `${valueRatio(p.score, p.cost).toFixed(1)} pts/€m` : ""}
+                          {valueMode
+                            ? `${(valueByName.get(p.name) ?? 0) >= 0 ? "+" : ""}${(valueByName.get(p.name) ?? 0).toFixed(0)}`
+                            : ""}
                         </td>
                         <td>
                           <button

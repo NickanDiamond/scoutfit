@@ -1,37 +1,46 @@
-// Scoring dimensions are chosen to match what's actually measurable from
-// free, real player data (FPL-style stats): no invented passing/dribbling
-// numbers. Each one maps to a club_weights column of the same name.
+// Scoring dimensions are EA Sports FC's own six-stat "pentagon" (Pace,
+// Shooting, Passing, Dribbling, Defending, Physical) plus Age (as
+// "Youth" — younger scores higher). Real ratings, not invented numbers.
+// Each maps to a club_weights column of the same name.
 
 export type Metric =
-  | "creativity"
-  | "threat"
-  | "influence"
-  | "productivity"
-  | "reliability";
+  | "pace"
+  | "shooting"
+  | "passing"
+  | "dribbling"
+  | "defending"
+  | "physical"
+  | "youth";
 
 export const METRICS: Metric[] = [
-  "creativity",
-  "threat",
-  "influence",
-  "productivity",
-  "reliability",
+  "pace",
+  "shooting",
+  "passing",
+  "dribbling",
+  "defending",
+  "physical",
+  "youth",
 ];
 
 export const METRIC_LABELS: Record<Metric, string> = {
-  creativity: "Creativity",
-  threat: "Threat",
-  influence: "Influence",
-  productivity: "Output",
-  reliability: "Reliability",
+  pace: "Pace",
+  shooting: "Shooting",
+  passing: "Passing",
+  dribbling: "Dribbling",
+  defending: "Defending",
+  physical: "Physical",
+  youth: "Youth",
 };
 
-// Short plain-language explanation shown under each slider / on hover.
+// Short plain-language explanation shown under each stat.
 export const METRIC_HELP: Record<Metric, string> = {
-  creativity: "Chances created for teammates",
-  threat: "How often they threaten to score",
-  influence: "Overall impact on matches",
-  productivity: "Goals + assists per 90 minutes",
-  reliability: "How nailed-on they are to start",
+  pace: "Raw speed, sprinting and accelerating",
+  shooting: "Finishing quality and shot power",
+  passing: "Range and accuracy of their passing",
+  dribbling: "Ball control and beating defenders",
+  defending: "Tackling, positioning, and pressing",
+  physical: "Strength, stamina, and winning duels",
+  youth: "How many years of prime are still ahead",
 };
 
 export type Weights = Record<Metric, number>;
@@ -127,10 +136,39 @@ export function topMetrics(weights: Weights, n = 2): Metric[] {
   return [...METRICS].sort((a, b) => weights[b] - weights[a]).slice(0, n);
 }
 
-// Fit points per €m spent (a +1 floor keeps very cheap players from
-// producing wild ratios via near-zero division). Used for a "best value"
-// ranking mode, so a cheap specialist can outrank a pricier all-rounder
-// who's only marginally better on raw fit.
-export function valueRatio(score: number, cost: number): number {
-  return score / (cost + 1);
+// "Value for money" ranking, take two:
+//
+// The first version was `score / (cost + 1)` using raw €m cost. That
+// broke in practice — real transfer prices span ~€0.3m to ~€200m (a
+// 600x range) while fit scores only span roughly 20-80 points (a 4x
+// range). Dividing by raw cost meant price completely dominated the
+// ratio, so "value mode" was effectively just "cheapest first," barely
+// touched by how good the actual fit was.
+//
+// Fix: compare percentile ranks instead of raw magnitudes. Both a
+// player's fit score and their cost get converted to a 0-100 rank
+// *within the current results pool* (100 = best fit / most expensive),
+// then value = fitPercentile - costPercentile. A player who fits
+// better than their price would suggest scores well; a star who's both
+// the best fit AND the most expensive nets out near zero, the way an
+// "expected performance for this price tag" read should work.
+export function percentileRanks(values: number[]): number[] {
+  const n = values.length;
+  if (n <= 1) return values.map(() => 50);
+  const sorted = [...values].sort((a, b) => a - b);
+  return values.map((v) => {
+    // average rank among ties, 0-100 scale
+    const below = sorted.filter((x) => x < v).length;
+    const equal = sorted.filter((x) => x === v).length;
+    const rank = below + (equal - 1) / 2;
+    return (rank / (n - 1)) * 100;
+  });
+}
+
+export function valueScores(
+  players: (Player & { score: number })[]
+): number[] {
+  const fitPct = percentileRanks(players.map((p) => p.score));
+  const costPct = percentileRanks(players.map((p) => p.cost));
+  return players.map((_, i) => fitPct[i] - costPct[i]);
 }
