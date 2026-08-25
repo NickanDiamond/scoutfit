@@ -7,13 +7,23 @@ export const DEFAULT_SEASON = "FC26";
 export interface ClubRow {
   id: string;
   name: string;
+  identity?: string;
+  budgetTier?: number;
 }
 
 export async function getClubs(): Promise<ClubRow[]> {
   if (!supabase) return [];
-  const { data, error } = await supabase.from("clubs").select("id, name").order("name");
+  const { data, error } = await supabase
+    .from("clubs")
+    .select("id, name, tactical_style, budget_tier")
+    .order("name");
   if (error) throw error;
-  return data ?? [];
+  return (data ?? []).map((r: any) => ({
+    id: r.id,
+    name: r.name,
+    identity: r.tactical_style ?? undefined,
+    budgetTier: r.budget_tier ?? undefined,
+  }));
 }
 
 export async function getClubWeights(

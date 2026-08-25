@@ -172,3 +172,30 @@ export function valueScores(
   const costPct = percentileRanks(players.map((p) => p.cost));
   return players.map((_, i) => fitPct[i] - costPct[i]);
 }
+
+// A club's real transfer-spending power (see budgetTier in CLUBS)
+// matters for a *scouting* tool: the whole point is recommending
+// players this specific club could realistically sign, not just the
+// best stat-fit on earth regardless of price. Below budget, no
+// penalty. Above it, a soft (square-root) penalty knocks the score
+// down without zeroing out a genuine standout who's only a bit of a
+// stretch — it should still show up, just not automatically outrank
+// every realistic option purely because raw fit was marginally higher.
+export function realismMultiplier(cost: number, budgetTier: number): number {
+  if (!budgetTier || budgetTier <= 0 || cost <= budgetTier) return 1;
+  return Math.sqrt(budgetTier / cost);
+}
+
+export function rankPlayersRealistic(
+  players: Player[],
+  weights: Weights,
+  budgetTier: number
+): (Player & { score: number; realism: number; stretch: boolean })[] {
+  return players
+    .map((p) => {
+      const score = fitScore(p, weights);
+      const realism = score * realismMultiplier(p.cost, budgetTier);
+      return { ...p, score, realism, stretch: budgetTier > 0 && p.cost > budgetTier };
+    })
+    .sort((a, b) => b.realism - a.realism);
+}

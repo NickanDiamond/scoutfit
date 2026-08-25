@@ -83,8 +83,9 @@ data only, no filler.
 6. To grow past 88 targets or 269 squad players: add more rows to the `RAW` / `RAW_SQUAD` objects in
    `generate-real-data.cjs` (same real-data source, more clubs/players),
    regenerate, and re-run the new `supabase/seed.sql`.
-7. **If you're upgrading from an earlier version** — any version before
-   this one is missing the `squad_players` table (new), and earlier
+7. **If you're upgrading from an earlier version** — this version adds a
+   `budget_tier` column to `clubs` and (if you're further behind) the
+   `squad_players` table, and earlier
    versions also used different column names in `player_stats` /
    `club_weights` (pace/shooting/passing/... instead of the old
    creativity/threat/influence/...). Drop and recreate everything:
@@ -138,6 +139,34 @@ ordered list of all 7 dimensions. Order determines weight — the top
 stat gets the largest share, the bottom stat the smallest — via
 `rankToWeights` in `lib/scoring.ts`. Arrow buttons are included next to
 each row as a non-drag fallback (keyboard/touch friendly).
+
+## Why club choice now actually matters
+
+Two real bugs made club choice barely affect recommendations, both fixed:
+
+1. **Six of the twelve clubs shared an identical tactical-style tag**
+   (Arsenal/PSG both "possession", Man City/Barcelona both
+   "possession_control", Liverpool/Bayern both "press", Man Utd/Dortmund
+   both "direct", Juventus/Inter both "defensive_control") — those pairs
+   produced literally identical weight profiles, so their top
+   recommendation for a given position was always the same player. Fixed:
+   every club now has its own distinct delta profile (12 unique profiles,
+   `CLUB_LIST` in `generate-real-data.cjs`), based on that club's real
+   recent tactical reputation, strong enough to visibly reorder every
+   position's rankings — e.g. Dortmund's "raw pace and young talent"
+   identity means their striker rankings favor a fast forward over a
+   pure finisher, even though the base Striker weighting favors Shooting
+   for every club.
+2. **No club had any sense of what it could realistically afford.** A
+   €0.3m squad player and a €200m superstar were compared on stats
+   alone, so the "best" recommendation for any club was often a transfer
+   no real club at that level could make. Fixed: each club has a real
+   `budgetTier` (rough transfer-spending power in €m), and the default
+   ranking (`rankPlayersRealistic` in `lib/scoring.ts`) applies a soft
+   penalty to players priced above it — enough to stop an unrealistic
+   superstar from automatically topping the list, without hiding them
+   entirely (they still show up, tagged "stretch"). "Value for money"
+   mode is unaffected — it's a separate, deliberately club-agnostic lens.
 
 ## Soccer-themed UI
 

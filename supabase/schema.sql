@@ -7,7 +7,8 @@ create table clubs (
   id uuid primary key default gen_random_uuid(),
   name text not null,
   league text,
-  tactical_style text,
+  tactical_style text,      -- short human-readable identity, e.g. "Direct, physical, transition-focused"
+  budget_tier numeric,       -- rough real transfer-spending power (EUR millions), used to keep recommendations realistic for this club
   created_at timestamptz default now()
 );
 

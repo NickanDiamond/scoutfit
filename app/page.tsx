@@ -32,7 +32,7 @@ import {
   METRIC_LABELS,
   METRIC_HELP,
   Metric,
-  rankPlayers,
+  rankPlayersRealistic,
   rankToWeights,
   valueScores,
   fitScore,
@@ -42,7 +42,8 @@ import {
 import { isSupabaseConfigured } from "@/lib/supabaseClient";
 import { getClubs, getClubWeights, getPlayersForPosition, getSquadForClub, getFullSquad, getAllClubWeights, ClubRow } from "@/lib/db";
 
-const COLORS = ["#4f7cff", "#22c55e", "#f2cd6b"];
+const COLORS = ["#4f7cff", "#22c55e", "#f2cd6b", "#fb923c"];
+const MAX_COMPARE = 4;
 const RANK_STYLES = [
   "bg-yellow-500/20 text-yellow-300 border-yellow-500/40",
   "bg-slate-400/20 text-slate-300 border-slate-400/40",
@@ -83,6 +84,16 @@ interface XISlot {
 // Rows laid out top (attacking third) to bottom (own third), each slot
 // positioned by percentage so the shape reads as a real formation —
 // here a 4-2-3-1 minus the goalkeeper (no real GK data to show).
+// Numbers follow the traditional outfield shirt-number convention for
+// this shape (2/3 full-backs, 4/5 centre-backs, 6 holding mid, 7/11
+// wingers, 8 central mid, 9 striker, 10 attacking mid) instead of an
+// arbitrary row/column count — real convention, not real squad numbers.
+const XI_NUMBERS = [
+  [9],           // ST
+  [7, 10, 11],   // WING, CAM, WING
+  [6, 8],        // DM, CM
+  [3, 5, 4, 2],  // FB, CB, CB, FB
+];
 function PitchXI({ rows }: { rows: XISlot[][] }) {
   const rowYs = [10, 34, 58, 84];
   return (
@@ -97,7 +108,7 @@ function PitchXI({ rows }: { rows: XISlot[][] }) {
               className="absolute flex flex-col items-center w-20 -translate-x-1/2 -translate-y-1/2 text-center"
               style={{ left: `${x}%`, top: `${rowYs[ri]}%` }}
             >
-              <Jersey number={ri * 10 + si + 1} size={38} />
+              <Jersey number={XI_NUMBERS[ri]?.[si] ?? si + 1} size={38} />
               <span className="text-white text-[11px] font-semibold mt-0.5 leading-tight drop-shadow truncate max-w-[80px]">
                 {slot?.name ?? "—"}
               </span>
@@ -124,6 +135,7 @@ export default function Home() {
   const [fullSquad, setFullSquad] = useState<Partial<Record<PositionKey, SquadMember[]>>>({});
   const [fullWeights, setFullWeights] = useState<Partial<Record<PositionKey, Weights>>>({});
   const [selected, setSelected] = useState<string[]>([]);
+  const [selectedSquad, setSelectedSquad] = useState<string[]>([]);
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -132,7 +144,14 @@ export default function Home() {
     if (isSupabaseConfigured) {
       getClubs().then(setClubs).catch((e) => setError(e.message));
     } else {
-      setClubs(Object.entries(SAMPLE_CLUBS).map(([id, c]) => ({ id, name: c.name })));
+      setClubs(
+        Object.entries(SAMPLE_CLUBS).map(([id, c]) => ({
+          id,
+          name: c.name,
+          identity: c.identity,
+          budgetTier: c.budgetTier,
+        }))
+      );
     }
   }, []);
 
@@ -232,6 +251,7 @@ export default function Home() {
     setSquad([]);
     setFullSquad({});
     setFullWeights({});
+    setSelectedSquad([]);
     setSelected([]);
     setQuery("");
   }
@@ -242,7 +262,12 @@ export default function Home() {
   }
 
   const weights = useMemo(() => rankToWeights(rankedStats), [rankedStats]);
-  const byFit = useMemo(() => rankPlayers(players, weights), [players, weights]);
+  const currentClub = clubs.find((c) => c.id === clubKey);
+  const currentClubName = currentClub?.name ?? "";
+  const byFit = useMemo(
+    () => rankPlayersRealistic(players, weights, currentClub?.budgetTier ?? 0),
+    [players, weights, currentClub]
+  );
   const valueByName = useMemo(() => {
     const scores = valueScores(byFit);
     const m = new Map<string, number>();
@@ -292,20 +317,40 @@ export default function Home() {
   function toggleCompare(name: string) {
     setSelected((prev) => {
       if (prev.includes(name)) return prev.filter((n) => n !== name);
-      if (prev.length >= 3) return prev;
+      if (prev.length + selectedSquad.length >= MAX_COMPARE) return prev;
       return [...prev, name];
     });
   }
 
-  const comparePlayers = players.filter((p) => selected.includes(p.name));
+  function toggleSquadCompare(name: string) {
+    setSelectedSquad((prev) => {
+      if (prev.includes(name)) return prev.filter((n) => n !== name);
+      if (prev.length + selected.length >= MAX_COMPARE) return prev;
+      return [...prev, name];
+    });
+  }
+
+  interface CompareEntry {
+    key: string;
+    label: string;
+    stats: Player["stats"];
+  }
+  const compareEntries: CompareEntry[] = [
+    ...players
+      .filter((p) => selected.includes(p.name))
+      .map((p) => ({ key: `t:${p.name}`, label: p.name, stats: p.stats })),
+    ...squadRanked
+      .filter((m) => selectedSquad.includes(m.name))
+      .map((m) => ({ key: `s:${m.name}`, label: `${m.name} (current)`, stats: m.stats })),
+  ];
   const radarData = METRICS.map((m) => {
     const row: Record<string, string | number> = { metric: METRIC_LABELS[m] };
-    comparePlayers.forEach((p) => {
-      row[p.name] = p.stats[m];
+    compareEntries.forEach((e) => {
+      row[e.key] = e.stats[m];
     });
     return row;
   });
-  const currentClubName = clubs.find((c) => c.id === clubKey)?.name ?? "";
+
   const stepIndex = STEP_ORDER.indexOf(step);
 
   return (
@@ -522,9 +567,17 @@ export default function Home() {
                 Start over
               </button>
             </div>
+            {currentClub?.identity && (
+              <p className="text-xs text-slate-500 mb-1">
+                <span className="text-slate-400 font-medium">{currentClubName}&rsquo;s identity:</span>{" "}
+                {currentClub.identity}
+                {currentClub.budgetTier ? ` · realistic budget up to ~€${currentClub.budgetTier}m` : ""}
+              </p>
+            )}
             <p className="text-slate-500 text-sm mb-6">
               Ranked by priority: {rankedStats.map((m) => METRIC_LABELS[m]).join(" > ")}
               {valueMode && " — sorted for best value, not just raw fit"}.
+              {!valueMode && " Sorting also accounts for what's realistic for this club to actually spend."}
             </p>
 
             {(() => {
@@ -589,6 +642,16 @@ export default function Home() {
                         <span className="text-white/70 text-[10px] leading-tight">
                           age {m.age} · fit {m.score.toFixed(0)}
                         </span>
+                        <button
+                          onClick={() => toggleSquadCompare(m.name)}
+                          className={`mt-1 text-[10px] px-2 py-0.5 rounded-full border transition-colors ${
+                            selectedSquad.includes(m.name)
+                              ? "bg-pitch-500 border-pitch-500 text-slate-950 font-semibold"
+                              : "border-white/30 text-white/80 hover:border-white"
+                          }`}
+                        >
+                          {selectedSquad.includes(m.name) ? "Comparing" : "Compare"}
+                        </button>
                       </div>
                     ))}
                   </div>
@@ -614,7 +677,7 @@ export default function Home() {
                 </div>
                 <span className="text-xs text-slate-600">{filtered.length} players</span>
               </div>
-              <p className="text-[11px] text-slate-600 mb-3">Check up to 3 to compare side by side.</p>
+              <p className="text-[11px] text-slate-600 mb-3">Check up to 4 to compare side by side — including a current squad player above.</p>
 
               {loading && (
                 <div className="space-y-2 animate-pulse">
@@ -657,6 +720,14 @@ export default function Home() {
                               <TrendingUp size={9} />+{(p.score - bestSquadScore).toFixed(0)}
                             </span>
                           )}
+                          {p.stretch && (
+                            <span
+                              className="ml-2 inline-flex items-center text-[10px] font-semibold text-amber-300 bg-amber-500/10 border border-amber-600/40 rounded-full px-1.5 py-0.5 align-middle"
+                              title={`Priced above ${currentClubName}'s realistic budget tier`}
+                            >
+                              stretch
+                            </span>
+                          )}
                         </td>
                         <td className="text-slate-400">€{p.cost}m</td>
                         <td>
@@ -694,7 +765,7 @@ export default function Home() {
               )}
             </div>
 
-            {comparePlayers.length >= 2 && (
+            {compareEntries.length >= 2 && (
               <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-4 mt-5">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2 text-slate-400">
@@ -702,14 +773,19 @@ export default function Home() {
                     <h3 className="text-xs uppercase tracking-wide font-medium">Compare</h3>
                   </div>
                   <div className="flex gap-1.5 flex-wrap">
-                    {comparePlayers.map((p, i) => (
+                    {compareEntries.map((e, i) => (
                       <span
-                        key={p.name}
+                        key={e.key}
                         className="flex items-center gap-1 text-xs px-2 py-1 rounded-full border border-slate-800 bg-slate-800/50"
                       >
                         <span className="w-2 h-2 rounded-full" style={{ background: COLORS[i] }} />
-                        {p.name}
-                        <button onClick={() => toggleCompare(p.name)} className="text-slate-500 hover:text-white">
+                        {e.label}
+                        <button
+                          onClick={() =>
+                            e.key.startsWith("s:") ? toggleSquadCompare(e.key.slice(2)) : toggleCompare(e.key.slice(2))
+                          }
+                          className="text-slate-500 hover:text-white"
+                        >
                           <X size={11} />
                         </button>
                       </span>
@@ -721,11 +797,11 @@ export default function Home() {
                     <PolarGrid stroke="#2a3346" />
                     <PolarAngleAxis dataKey="metric" tick={{ fill: "#8b93a7", fontSize: 11 }} />
                     <PolarRadiusAxis domain={[0, 100]} tick={false} axisLine={false} />
-                    {comparePlayers.map((p, i) => (
+                    {compareEntries.map((e, i) => (
                       <Radar
-                        key={p.name}
-                        name={p.name}
-                        dataKey={p.name}
+                        key={e.key}
+                        name={e.label}
+                        dataKey={e.key}
                         stroke={COLORS[i]}
                         fill={COLORS[i]}
                         fillOpacity={0.2}

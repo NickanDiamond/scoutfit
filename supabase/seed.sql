@@ -5,189 +5,189 @@
 -- across the Premier League, La Liga, Bundesliga, Ligue 1, and Serie A.
 
 with inserted_clubs as (
-  insert into clubs (name, league, tactical_style) values
-    ('Arsenal', 'Premier League', 'possession'),
-    ('Liverpool', 'Premier League', 'press'),
-    ('Manchester City', 'Premier League', 'possession_control'),
-    ('Manchester United', 'Premier League', 'direct'),
-    ('Chelsea', 'Premier League', 'young_dynamic'),
-    ('FC Barcelona', 'La Liga', 'possession_control'),
-    ('Real Madrid', 'La Liga', 'galactico'),
-    ('Bayern Munich', 'Bundesliga', 'press'),
-    ('Paris Saint-Germain', 'Ligue 1', 'possession'),
-    ('Juventus FC', 'Serie A', 'defensive_control'),
-    ('Borussia Dortmund', 'Bundesliga', 'direct'),
-    ('Inter Milan', 'Serie A', 'defensive_control')
+  insert into clubs (name, league, tactical_style, budget_tier) values
+    ('Arsenal', 'Premier League', 'Structured possession with a real press', 130),
+    ('Liverpool', 'Premier League', 'Fast, vertical, high-intensity press', 140),
+    ('Manchester City', 'Premier League', 'Total possession control, technical over physical', 180),
+    ('Manchester United', 'Premier League', 'Direct, physical, transition-focused', 120),
+    ('Chelsea', 'Premier League', 'Young, athletic, upside over experience', 150),
+    ('FC Barcelona', 'La Liga', 'Academy possession football, tight budget', 100),
+    ('Real Madrid', 'La Liga', 'Proven galacticos, clinical over raw potential', 180),
+    ('Bayern Munich', 'Bundesliga', 'Dominant possession with a physical press', 140),
+    ('Paris Saint-Germain', 'Ligue 1', 'Individual flair and pace in transition', 170),
+    ('Juventus FC', 'Serie A', 'Defensive solidity, experience over risk', 90),
+    ('Borussia Dortmund', 'Bundesliga', 'Raw pace and young talent development', 90),
+    ('Inter Milan', 'Serie A', 'Tactically disciplined, physical, experienced spine', 80)
   returning id, name
 )
 insert into club_weights (club_id, position, pace_weight, shooting_weight, passing_weight, dribbling_weight, defending_weight, physical_weight, youth_weight)
-select id, 'CB', 5, 0, 25, 10, 35, 10, 15 from inserted_clubs where name = 'Arsenal'
+select id, 'CB', 2, 0, 30, 15, 43, 10, 15 from inserted_clubs where name = 'Arsenal'
 union all
-select id, 'FB', 15, 5, 25, 20, 20, 0, 15 from inserted_clubs where name = 'Arsenal'
+select id, 'FB', 12, 5, 30, 25, 28, 0, 15 from inserted_clubs where name = 'Arsenal'
 union all
-select id, 'DM', 0, 0, 30, 15, 30, 10, 15 from inserted_clubs where name = 'Arsenal'
+select id, 'DM', 0, 0, 35, 20, 38, 10, 15 from inserted_clubs where name = 'Arsenal'
 union all
-select id, 'CM', 5, 5, 35, 25, 15, 5, 10 from inserted_clubs where name = 'Arsenal'
+select id, 'CM', 2, 5, 40, 30, 23, 5, 10 from inserted_clubs where name = 'Arsenal'
 union all
-select id, 'CAM', 5, 20, 35, 30, 0, 0, 15 from inserted_clubs where name = 'Arsenal'
+select id, 'CAM', 2, 20, 40, 35, 8, 0, 15 from inserted_clubs where name = 'Arsenal'
 union all
-select id, 'WING', 25, 15, 20, 30, 0, 0, 15 from inserted_clubs where name = 'Arsenal'
+select id, 'WING', 22, 15, 25, 35, 8, 0, 15 from inserted_clubs where name = 'Arsenal'
 union all
-select id, 'ST', 15, 35, 15, 20, 0, 5, 10 from inserted_clubs where name = 'Arsenal'
+select id, 'ST', 12, 35, 20, 25, 8, 5, 10 from inserted_clubs where name = 'Arsenal'
 union all
-select id, 'CB', 15, 0, 10, 5, 45, 25, 15 from inserted_clubs where name = 'Liverpool'
+select id, 'CB', 25, 0, 5, 5, 45, 32, 15 from inserted_clubs where name = 'Liverpool'
 union all
-select id, 'FB', 25, 5, 10, 15, 30, 15, 15 from inserted_clubs where name = 'Liverpool'
+select id, 'FB', 35, 0, 5, 15, 30, 22, 15 from inserted_clubs where name = 'Liverpool'
 union all
-select id, 'DM', 10, 0, 15, 10, 40, 25, 15 from inserted_clubs where name = 'Liverpool'
+select id, 'DM', 20, 0, 10, 10, 40, 32, 15 from inserted_clubs where name = 'Liverpool'
 union all
-select id, 'CM', 15, 5, 20, 20, 25, 20, 10 from inserted_clubs where name = 'Liverpool'
+select id, 'CM', 25, 0, 15, 20, 25, 27, 10 from inserted_clubs where name = 'Liverpool'
 union all
-select id, 'CAM', 15, 20, 20, 25, 10, 10, 15 from inserted_clubs where name = 'Liverpool'
+select id, 'CAM', 25, 15, 15, 25, 10, 17, 15 from inserted_clubs where name = 'Liverpool'
 union all
-select id, 'WING', 35, 15, 5, 25, 10, 10, 15 from inserted_clubs where name = 'Liverpool'
+select id, 'WING', 45, 10, 0, 25, 10, 17, 15 from inserted_clubs where name = 'Liverpool'
 union all
-select id, 'ST', 25, 35, 0, 15, 10, 20, 10 from inserted_clubs where name = 'Liverpool'
+select id, 'ST', 35, 30, 0, 15, 10, 27, 10 from inserted_clubs where name = 'Liverpool'
 union all
-select id, 'CB', 0, 0, 30, 15, 35, 10, 15 from inserted_clubs where name = 'Manchester City'
+select id, 'CB', 0, 0, 37, 20, 30, 5, 15 from inserted_clubs where name = 'Manchester City'
 union all
-select id, 'FB', 10, 5, 30, 25, 20, 0, 15 from inserted_clubs where name = 'Manchester City'
+select id, 'FB', 8, 5, 37, 30, 15, 0, 15 from inserted_clubs where name = 'Manchester City'
 union all
-select id, 'DM', 0, 0, 35, 20, 30, 10, 15 from inserted_clubs where name = 'Manchester City'
+select id, 'DM', 0, 0, 42, 25, 25, 5, 15 from inserted_clubs where name = 'Manchester City'
 union all
-select id, 'CM', 0, 5, 40, 30, 15, 5, 10 from inserted_clubs where name = 'Manchester City'
+select id, 'CM', 0, 5, 47, 35, 10, 0, 10 from inserted_clubs where name = 'Manchester City'
 union all
-select id, 'CAM', 0, 20, 40, 35, 0, 0, 15 from inserted_clubs where name = 'Manchester City'
+select id, 'CAM', 0, 20, 47, 40, 0, 0, 15 from inserted_clubs where name = 'Manchester City'
 union all
-select id, 'WING', 20, 15, 25, 35, 0, 0, 15 from inserted_clubs where name = 'Manchester City'
+select id, 'WING', 18, 15, 32, 40, 0, 0, 15 from inserted_clubs where name = 'Manchester City'
 union all
-select id, 'ST', 10, 35, 20, 25, 0, 5, 10 from inserted_clubs where name = 'Manchester City'
+select id, 'ST', 8, 35, 27, 30, 0, 0, 10 from inserted_clubs where name = 'Manchester City'
 union all
-select id, 'CB', 20, 0, 5, 0, 35, 25, 15 from inserted_clubs where name = 'Manchester United'
+select id, 'CB', 25, 8, 0, 0, 35, 32, 15 from inserted_clubs where name = 'Manchester United'
 union all
-select id, 'FB', 30, 5, 5, 10, 20, 15, 15 from inserted_clubs where name = 'Manchester United'
+select id, 'FB', 35, 13, 0, 7, 20, 22, 15 from inserted_clubs where name = 'Manchester United'
 union all
-select id, 'DM', 15, 0, 10, 5, 30, 25, 15 from inserted_clubs where name = 'Manchester United'
+select id, 'DM', 20, 8, 5, 2, 30, 32, 15 from inserted_clubs where name = 'Manchester United'
 union all
-select id, 'CM', 20, 5, 15, 15, 15, 20, 10 from inserted_clubs where name = 'Manchester United'
+select id, 'CM', 25, 13, 10, 12, 15, 27, 10 from inserted_clubs where name = 'Manchester United'
 union all
-select id, 'CAM', 20, 20, 15, 20, 0, 10, 15 from inserted_clubs where name = 'Manchester United'
+select id, 'CAM', 25, 28, 10, 17, 0, 17, 15 from inserted_clubs where name = 'Manchester United'
 union all
-select id, 'WING', 40, 15, 0, 20, 0, 10, 15 from inserted_clubs where name = 'Manchester United'
+select id, 'WING', 45, 23, 0, 17, 0, 17, 15 from inserted_clubs where name = 'Manchester United'
 union all
-select id, 'ST', 30, 35, 0, 10, 0, 20, 10 from inserted_clubs where name = 'Manchester United'
+select id, 'ST', 35, 43, 0, 7, 0, 27, 10 from inserted_clubs where name = 'Manchester United'
 union all
-select id, 'CB', 15, 0, 15, 5, 25, 15, 30 from inserted_clubs where name = 'Chelsea'
+select id, 'CB', 20, 0, 15, 13, 23, 12, 35 from inserted_clubs where name = 'Chelsea'
 union all
-select id, 'FB', 25, 5, 15, 15, 10, 5, 30 from inserted_clubs where name = 'Chelsea'
+select id, 'FB', 30, 5, 15, 23, 8, 2, 35 from inserted_clubs where name = 'Chelsea'
 union all
-select id, 'DM', 10, 0, 20, 10, 20, 15, 30 from inserted_clubs where name = 'Chelsea'
+select id, 'DM', 15, 0, 20, 18, 18, 12, 35 from inserted_clubs where name = 'Chelsea'
 union all
-select id, 'CM', 15, 5, 25, 20, 5, 10, 25 from inserted_clubs where name = 'Chelsea'
+select id, 'CM', 20, 5, 25, 28, 3, 7, 30 from inserted_clubs where name = 'Chelsea'
 union all
-select id, 'CAM', 15, 20, 25, 25, 0, 0, 30 from inserted_clubs where name = 'Chelsea'
+select id, 'CAM', 20, 20, 25, 33, 0, 0, 35 from inserted_clubs where name = 'Chelsea'
 union all
-select id, 'WING', 35, 15, 10, 25, 0, 0, 30 from inserted_clubs where name = 'Chelsea'
+select id, 'WING', 40, 15, 10, 33, 0, 0, 35 from inserted_clubs where name = 'Chelsea'
 union all
-select id, 'ST', 25, 35, 5, 15, 0, 10, 25 from inserted_clubs where name = 'Chelsea'
+select id, 'ST', 30, 35, 5, 23, 0, 7, 30 from inserted_clubs where name = 'Chelsea'
 union all
-select id, 'CB', 0, 0, 30, 15, 35, 10, 15 from inserted_clubs where name = 'FC Barcelona'
+select id, 'CB', 10, 0, 33, 20, 25, 5, 27 from inserted_clubs where name = 'FC Barcelona'
 union all
-select id, 'FB', 10, 5, 30, 25, 20, 0, 15 from inserted_clubs where name = 'FC Barcelona'
+select id, 'FB', 20, 5, 33, 30, 10, 0, 27 from inserted_clubs where name = 'FC Barcelona'
 union all
-select id, 'DM', 0, 0, 35, 20, 30, 10, 15 from inserted_clubs where name = 'FC Barcelona'
+select id, 'DM', 5, 0, 38, 25, 20, 5, 27 from inserted_clubs where name = 'FC Barcelona'
 union all
-select id, 'CM', 0, 5, 40, 30, 15, 5, 10 from inserted_clubs where name = 'FC Barcelona'
+select id, 'CM', 10, 5, 43, 35, 5, 0, 22 from inserted_clubs where name = 'FC Barcelona'
 union all
-select id, 'CAM', 0, 20, 40, 35, 0, 0, 15 from inserted_clubs where name = 'FC Barcelona'
+select id, 'CAM', 10, 20, 43, 40, 0, 0, 27 from inserted_clubs where name = 'FC Barcelona'
 union all
-select id, 'WING', 20, 15, 25, 35, 0, 0, 15 from inserted_clubs where name = 'FC Barcelona'
+select id, 'WING', 30, 15, 28, 40, 0, 0, 27 from inserted_clubs where name = 'FC Barcelona'
 union all
-select id, 'ST', 10, 35, 20, 25, 0, 5, 10 from inserted_clubs where name = 'FC Barcelona'
+select id, 'ST', 20, 35, 23, 30, 0, 0, 22 from inserted_clubs where name = 'FC Barcelona'
 union all
-select id, 'CB', 10, 10, 15, 15, 20, 20, 10 from inserted_clubs where name = 'Real Madrid'
+select id, 'CB', 10, 15, 15, 17, 25, 25, 0 from inserted_clubs where name = 'Real Madrid'
 union all
-select id, 'FB', 20, 15, 15, 25, 5, 10, 10 from inserted_clubs where name = 'Real Madrid'
+select id, 'FB', 20, 20, 15, 27, 10, 15, 0 from inserted_clubs where name = 'Real Madrid'
 union all
-select id, 'DM', 5, 10, 20, 20, 15, 20, 10 from inserted_clubs where name = 'Real Madrid'
+select id, 'DM', 5, 15, 20, 22, 20, 25, 0 from inserted_clubs where name = 'Real Madrid'
 union all
-select id, 'CM', 10, 15, 25, 30, 0, 15, 5 from inserted_clubs where name = 'Real Madrid'
+select id, 'CM', 10, 20, 25, 32, 5, 20, 0 from inserted_clubs where name = 'Real Madrid'
 union all
-select id, 'CAM', 10, 30, 25, 35, 0, 5, 10 from inserted_clubs where name = 'Real Madrid'
+select id, 'CAM', 10, 35, 25, 37, 0, 10, 0 from inserted_clubs where name = 'Real Madrid'
 union all
-select id, 'WING', 30, 25, 10, 35, 0, 5, 10 from inserted_clubs where name = 'Real Madrid'
+select id, 'WING', 30, 30, 10, 37, 0, 10, 0 from inserted_clubs where name = 'Real Madrid'
 union all
-select id, 'ST', 20, 45, 5, 25, 0, 15, 5 from inserted_clubs where name = 'Real Madrid'
+select id, 'ST', 20, 50, 5, 27, 0, 20, 0 from inserted_clubs where name = 'Real Madrid'
 union all
-select id, 'CB', 15, 0, 10, 5, 45, 25, 15 from inserted_clubs where name = 'Bayern Munich'
+select id, 'CB', 15, 0, 30, 5, 47, 30, 5 from inserted_clubs where name = 'Bayern Munich'
 union all
-select id, 'FB', 25, 5, 10, 15, 30, 15, 15 from inserted_clubs where name = 'Bayern Munich'
+select id, 'FB', 25, 5, 30, 15, 32, 20, 5 from inserted_clubs where name = 'Bayern Munich'
 union all
-select id, 'DM', 10, 0, 15, 10, 40, 25, 15 from inserted_clubs where name = 'Bayern Munich'
+select id, 'DM', 10, 0, 35, 10, 42, 30, 5 from inserted_clubs where name = 'Bayern Munich'
 union all
-select id, 'CM', 15, 5, 20, 20, 25, 20, 10 from inserted_clubs where name = 'Bayern Munich'
+select id, 'CM', 15, 5, 40, 20, 27, 25, 0 from inserted_clubs where name = 'Bayern Munich'
 union all
-select id, 'CAM', 15, 20, 20, 25, 10, 10, 15 from inserted_clubs where name = 'Bayern Munich'
+select id, 'CAM', 15, 20, 40, 25, 12, 15, 5 from inserted_clubs where name = 'Bayern Munich'
 union all
-select id, 'WING', 35, 15, 5, 25, 10, 10, 15 from inserted_clubs where name = 'Bayern Munich'
+select id, 'WING', 35, 15, 25, 25, 12, 15, 5 from inserted_clubs where name = 'Bayern Munich'
 union all
-select id, 'ST', 25, 35, 0, 15, 10, 20, 10 from inserted_clubs where name = 'Bayern Munich'
+select id, 'ST', 25, 35, 20, 15, 12, 25, 0 from inserted_clubs where name = 'Bayern Munich'
 union all
-select id, 'CB', 5, 0, 25, 10, 35, 10, 15 from inserted_clubs where name = 'Paris Saint-Germain'
+select id, 'CB', 22, 0, 25, 23, 23, 12, 15 from inserted_clubs where name = 'Paris Saint-Germain'
 union all
-select id, 'FB', 15, 5, 25, 20, 20, 0, 15 from inserted_clubs where name = 'Paris Saint-Germain'
+select id, 'FB', 32, 5, 25, 33, 8, 2, 15 from inserted_clubs where name = 'Paris Saint-Germain'
 union all
-select id, 'DM', 0, 0, 30, 15, 30, 10, 15 from inserted_clubs where name = 'Paris Saint-Germain'
+select id, 'DM', 17, 0, 30, 28, 18, 12, 15 from inserted_clubs where name = 'Paris Saint-Germain'
 union all
-select id, 'CM', 5, 5, 35, 25, 15, 5, 10 from inserted_clubs where name = 'Paris Saint-Germain'
+select id, 'CM', 22, 5, 35, 38, 3, 7, 10 from inserted_clubs where name = 'Paris Saint-Germain'
 union all
-select id, 'CAM', 5, 20, 35, 30, 0, 0, 15 from inserted_clubs where name = 'Paris Saint-Germain'
+select id, 'CAM', 22, 20, 35, 43, 0, 0, 15 from inserted_clubs where name = 'Paris Saint-Germain'
 union all
-select id, 'WING', 25, 15, 20, 30, 0, 0, 15 from inserted_clubs where name = 'Paris Saint-Germain'
+select id, 'WING', 42, 15, 20, 43, 0, 0, 15 from inserted_clubs where name = 'Paris Saint-Germain'
 union all
-select id, 'ST', 15, 35, 15, 20, 0, 5, 10 from inserted_clubs where name = 'Paris Saint-Germain'
+select id, 'ST', 32, 35, 15, 33, 0, 7, 10 from inserted_clubs where name = 'Paris Saint-Germain'
 union all
-select id, 'CB', 5, 0, 15, 5, 50, 30, 15 from inserted_clubs where name = 'Juventus FC'
+select id, 'CB', 2, 0, 15, 5, 53, 32, 3 from inserted_clubs where name = 'Juventus FC'
 union all
-select id, 'FB', 15, 0, 15, 15, 35, 20, 15 from inserted_clubs where name = 'Juventus FC'
+select id, 'FB', 12, 0, 15, 15, 38, 22, 3 from inserted_clubs where name = 'Juventus FC'
 union all
-select id, 'DM', 0, 0, 20, 10, 45, 30, 15 from inserted_clubs where name = 'Juventus FC'
+select id, 'DM', 0, 0, 20, 10, 48, 32, 3 from inserted_clubs where name = 'Juventus FC'
 union all
-select id, 'CM', 5, 0, 25, 20, 30, 25, 10 from inserted_clubs where name = 'Juventus FC'
+select id, 'CM', 2, 0, 25, 20, 33, 27, 0 from inserted_clubs where name = 'Juventus FC'
 union all
-select id, 'CAM', 5, 10, 25, 25, 15, 15, 15 from inserted_clubs where name = 'Juventus FC'
+select id, 'CAM', 2, 15, 25, 25, 18, 17, 3 from inserted_clubs where name = 'Juventus FC'
 union all
-select id, 'WING', 25, 5, 10, 25, 15, 15, 15 from inserted_clubs where name = 'Juventus FC'
+select id, 'WING', 22, 10, 10, 25, 18, 17, 3 from inserted_clubs where name = 'Juventus FC'
 union all
-select id, 'ST', 15, 25, 5, 15, 15, 25, 10 from inserted_clubs where name = 'Juventus FC'
+select id, 'ST', 12, 30, 5, 15, 18, 27, 0 from inserted_clubs where name = 'Juventus FC'
 union all
-select id, 'CB', 20, 0, 5, 0, 35, 25, 15 from inserted_clubs where name = 'Borussia Dortmund'
+select id, 'CB', 28, 0, 15, 15, 27, 12, 30 from inserted_clubs where name = 'Borussia Dortmund'
 union all
-select id, 'FB', 30, 5, 5, 10, 20, 15, 15 from inserted_clubs where name = 'Borussia Dortmund'
+select id, 'FB', 38, 5, 15, 25, 12, 2, 30 from inserted_clubs where name = 'Borussia Dortmund'
 union all
-select id, 'DM', 15, 0, 10, 5, 30, 25, 15 from inserted_clubs where name = 'Borussia Dortmund'
+select id, 'DM', 23, 0, 20, 20, 22, 12, 30 from inserted_clubs where name = 'Borussia Dortmund'
 union all
-select id, 'CM', 20, 5, 15, 15, 15, 20, 10 from inserted_clubs where name = 'Borussia Dortmund'
+select id, 'CM', 28, 5, 25, 30, 7, 7, 25 from inserted_clubs where name = 'Borussia Dortmund'
 union all
-select id, 'CAM', 20, 20, 15, 20, 0, 10, 15 from inserted_clubs where name = 'Borussia Dortmund'
+select id, 'CAM', 28, 20, 25, 35, 0, 0, 30 from inserted_clubs where name = 'Borussia Dortmund'
 union all
-select id, 'WING', 40, 15, 0, 20, 0, 10, 15 from inserted_clubs where name = 'Borussia Dortmund'
+select id, 'WING', 48, 15, 10, 35, 0, 0, 30 from inserted_clubs where name = 'Borussia Dortmund'
 union all
-select id, 'ST', 30, 35, 0, 10, 0, 20, 10 from inserted_clubs where name = 'Borussia Dortmund'
+select id, 'ST', 38, 35, 5, 25, 0, 7, 25 from inserted_clubs where name = 'Borussia Dortmund'
 union all
-select id, 'CB', 5, 0, 15, 5, 50, 30, 15 from inserted_clubs where name = 'Inter Milan'
+select id, 'CB', 0, 0, 15, 0, 50, 35, 0 from inserted_clubs where name = 'Inter Milan'
 union all
-select id, 'FB', 15, 0, 15, 15, 35, 20, 15 from inserted_clubs where name = 'Inter Milan'
+select id, 'FB', 10, 5, 15, 10, 35, 25, 0 from inserted_clubs where name = 'Inter Milan'
 union all
-select id, 'DM', 0, 0, 20, 10, 45, 30, 15 from inserted_clubs where name = 'Inter Milan'
+select id, 'DM', 0, 0, 20, 5, 45, 35, 0 from inserted_clubs where name = 'Inter Milan'
 union all
-select id, 'CM', 5, 0, 25, 20, 30, 25, 10 from inserted_clubs where name = 'Inter Milan'
+select id, 'CM', 0, 5, 25, 15, 30, 30, 0 from inserted_clubs where name = 'Inter Milan'
 union all
-select id, 'CAM', 5, 10, 25, 25, 15, 15, 15 from inserted_clubs where name = 'Inter Milan'
+select id, 'CAM', 0, 20, 25, 20, 15, 20, 0 from inserted_clubs where name = 'Inter Milan'
 union all
-select id, 'WING', 25, 5, 10, 25, 15, 15, 15 from inserted_clubs where name = 'Inter Milan'
+select id, 'WING', 20, 15, 10, 20, 15, 20, 0 from inserted_clubs where name = 'Inter Milan'
 union all
-select id, 'ST', 15, 25, 5, 15, 15, 25, 10 from inserted_clubs where name = 'Inter Milan';
+select id, 'ST', 10, 35, 5, 10, 15, 30, 0 from inserted_clubs where name = 'Inter Milan';
 
 -- Players
 insert into players (name, club, position, price) values

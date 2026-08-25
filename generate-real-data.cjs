@@ -693,39 +693,59 @@ const BASE_WEIGHTS = {
   WING: { pace: 30, shooting: 15, passing: 10, dribbling: 25, defending: 0,  physical: 5,  youth: 15 },
   ST:   { pace: 20, shooting: 35, passing: 5,  dribbling: 15, defending: 0,  physical: 15, youth: 10 },
 };
+// Each club gets its OWN tactical delta profile (not a shared style
+// bucket) so no two clubs ever produce identical weights. Deltas are
+// deliberately large (up to +/-22) and touch 4-5 metrics each,
+// reflecting each club's real recent tactical reputation, so a club's
+// identity visibly reorders recommendations for every position -- not
+// just the ones where the default base weight happens to be close.
 const CLUB_LIST = [
-  { key: "arsenal", name: "Arsenal", league: "Premier League", style: "possession" },
-  { key: "liverpool", name: "Liverpool", league: "Premier League", style: "press" },
-  { key: "mancity", name: "Manchester City", league: "Premier League", style: "possession_control" },
-  { key: "manutd", name: "Manchester United", league: "Premier League", style: "direct" },
-  { key: "chelsea", name: "Chelsea", league: "Premier League", style: "young_dynamic" },
-  { key: "barcelona", name: "FC Barcelona", league: "La Liga", style: "possession_control" },
-  { key: "realmadrid", name: "Real Madrid", league: "La Liga", style: "galactico" },
-  { key: "bayern", name: "Bayern Munich", league: "Bundesliga", style: "press" },
-  { key: "psg", name: "Paris Saint-Germain", league: "Ligue 1", style: "possession" },
-  { key: "juventus", name: "Juventus FC", league: "Serie A", style: "defensive_control" },
-  { key: "dortmund", name: "Borussia Dortmund", league: "Bundesliga", style: "direct" },
-  { key: "intermilan", name: "Inter Milan", league: "Serie A", style: "defensive_control" },
+  { key: "arsenal", name: "Arsenal", league: "Premier League", budgetTier: 130,
+    identity: "Structured possession with a real press",
+    delta: { passing: 15, dribbling: 10, defending: 8, pace: -8, physical: -10 } },
+  { key: "liverpool", name: "Liverpool", league: "Premier League", budgetTier: 140,
+    identity: "Fast, vertical, high-intensity press",
+    delta: { pace: 15, physical: 12, defending: 10, passing: -10, shooting: -5 } },
+  { key: "mancity", name: "Manchester City", league: "Premier League", budgetTier: 180,
+    identity: "Total possession control, technical over physical",
+    delta: { passing: 22, dribbling: 15, physical: -15, pace: -12, defending: -5 } },
+  { key: "manutd", name: "Manchester United", league: "Premier League", budgetTier: 120,
+    identity: "Direct, physical, transition-focused",
+    delta: { pace: 15, physical: 12, shooting: 8, passing: -15, dribbling: -8 } },
+  { key: "chelsea", name: "Chelsea", league: "Premier League", budgetTier: 150,
+    identity: "Young, athletic, upside over experience",
+    delta: { youth: 20, pace: 10, dribbling: 8, defending: -12, physical: -8 } },
+  { key: "barcelona", name: "FC Barcelona", league: "La Liga", budgetTier: 100,
+    identity: "Academy possession football, tight budget",
+    delta: { passing: 18, dribbling: 15, youth: 12, physical: -15, defending: -10 } },
+  { key: "realmadrid", name: "Real Madrid", league: "La Liga", budgetTier: 180,
+    identity: "Proven galacticos, clinical over raw potential",
+    delta: { shooting: 15, dribbling: 12, youth: -15, physical: 5, defending: -10 } },
+  { key: "bayern", name: "Bayern Munich", league: "Bundesliga", budgetTier: 140,
+    identity: "Dominant possession with a physical press",
+    delta: { passing: 15, defending: 12, physical: 10, pace: 5, youth: -10 } },
+  { key: "psg", name: "Paris Saint-Germain", league: "Ligue 1", budgetTier: 170,
+    identity: "Individual flair and pace in transition",
+    delta: { dribbling: 18, pace: 12, passing: 10, defending: -12, physical: -8 } },
+  { key: "juventus", name: "Juventus FC", league: "Serie A", budgetTier: 90,
+    identity: "Defensive solidity, experience over risk",
+    delta: { defending: 18, physical: 12, youth: -12, pace: -8, shooting: -5 } },
+  { key: "dortmund", name: "Borussia Dortmund", league: "Bundesliga", budgetTier: 90,
+    identity: "Raw pace and young talent development",
+    delta: { pace: 18, youth: 15, dribbling: 10, physical: -8, defending: -8 } },
+  { key: "intermilan", name: "Inter Milan", league: "Serie A", budgetTier: 80,
+    identity: "Tactically disciplined, physical, experienced spine",
+    delta: { defending: 15, physical: 15, youth: -15, pace: -10, dribbling: -5 } },
 ];
-const STYLE_DELTAS = {
-  possession: { passing: 10, dribbling: 5, pace: -5, physical: -10 },
-  press: { defending: 10, physical: 5, pace: 5, passing: -5 },
-  possession_control: { passing: 15, dribbling: 10, physical: -10, pace: -10 },
-  direct: { pace: 10, physical: 5, passing: -10, dribbling: -5 },
-  young_dynamic: { youth: 15, pace: 5, physical: -5, defending: -10 },
-  galactico: { shooting: 10, dribbling: 10, defending: -15, youth: -5 },
-  defensive_control: { defending: 15, physical: 10, pace: -5, shooting: -10 },
-};
-function buildWeights(position, style) {
+function buildWeights(position, delta) {
   const base = BASE_WEIGHTS[position];
-  const delta = STYLE_DELTAS[style] || {};
   const w = {};
   METRICS.forEach((m) => { w[m] = Math.round(clip((base[m] || 0) + (delta[m] || 0), 0, 100)); });
   return w;
 }
 const CLUBS = {};
 CLUB_LIST.forEach((c) => {
-  CLUBS[c.key] = { name: c.name, weights: Object.fromEntries(Object.keys(POSITIONS).map((pos) => [pos, buildWeights(pos, c.style)])) };
+  CLUBS[c.key] = { name: c.name, weights: Object.fromEntries(Object.keys(POSITIONS).map((pos) => [pos, buildWeights(pos, c.delta)])) };
 });
 
 // ---------- lib/sampleData.ts ----------
@@ -752,13 +772,15 @@ export type PositionKey = keyof typeof POSITIONS;
 
 interface ClubDef {
   name: string;
+  identity: string;
+  budgetTier: number;
   weights: Record<PositionKey, Weights>;
 }
 
 export const CLUBS: Record<string, ClubDef> = {
 `;
 CLUB_LIST.forEach((c) => {
-  ts += `  ${c.key}: {\n    name: "${c.name}",\n    weights: {\n`;
+  ts += `  ${c.key}: {\n    name: "${c.name}",\n    identity: ${JSON.stringify(c.identity)},\n    budgetTier: ${c.budgetTier},\n    weights: {\n`;
   Object.keys(POSITIONS).forEach((pos) => { ts += `      ${pos}: ${tsWeights(CLUBS[c.key].weights[pos])},\n`; });
   ts += `    },\n  },\n`;
 });
@@ -794,9 +816,9 @@ let sql = `-- ScoutFit real-data seed (run AFTER schema.sql)
 -- across the Premier League, La Liga, Bundesliga, Ligue 1, and Serie A.
 
 with inserted_clubs as (
-  insert into clubs (name, league, tactical_style) values
+  insert into clubs (name, league, tactical_style, budget_tier) values
 `;
-sql += CLUB_LIST.map((c) => `    (${sqlStr(c.name)}, ${sqlStr(c.league)}, ${sqlStr(c.style)})`).join(",\n") + "\n";
+sql += CLUB_LIST.map((c) => `    (${sqlStr(c.name)}, ${sqlStr(c.league)}, ${sqlStr(c.identity)}, ${c.budgetTier})`).join(",\n") + "\n";
 sql += `  returning id, name
 )
 insert into club_weights (club_id, position, pace_weight, shooting_weight, passing_weight, dribbling_weight, defending_weight, physical_weight, youth_weight)
