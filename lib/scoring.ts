@@ -75,7 +75,8 @@ export function minMaxNormalize(values: number[]): number[] {
 }
 
 // Simple equal-weight split across whichever stats the user picked as
-// mattering — no sliders, no percentages to reason about.
+// mattering — no sliders, no percentages to reason about. Kept as a
+// fallback / building block for rankToWeights below.
 export function equalWeights(selected: Metric[]): Weights {
   const w = {} as Weights;
   METRICS.forEach((m) => {
@@ -85,6 +86,37 @@ export function equalWeights(selected: Metric[]): Weights {
   const share = Math.round(100 / selected.length);
   selected.forEach((m) => {
     w[m] = share;
+  });
+  return w;
+}
+
+// Converts a drag-to-rank ordering into descending weights: rank 1 (most
+// important, index 0) gets the biggest share, the last stat gets the
+// smallest. Uses a simple descending-weight sequence (n, n-1, ..., 1) so
+// the gap between neighbors is even and predictable, then normalizes to
+// whole percentages that sum to 100. Any metric not included in `ranked`
+// gets 0 weight, same contract as equalWeights.
+export function rankToWeights(ranked: Metric[]): Weights {
+  const w = {} as Weights;
+  METRICS.forEach((m) => {
+    w[m] = 0;
+  });
+  const n = ranked.length;
+  if (n === 0) return w;
+  if (n === 1) {
+    w[ranked[0]] = 100;
+    return w;
+  }
+  // Raw shares: first pick gets weight n, last pick gets weight 1.
+  const rawWeights = ranked.map((_, i) => n - i);
+  const rawTotal = rawWeights.reduce((s, v) => s + v, 0);
+  let rounded = rawWeights.map((v) => Math.round((v / rawTotal) * 100));
+  // Rounding can drift the total off 100 by a point or two — correct it
+  // on the highest-ranked stat so "most important" stays most important.
+  const drift = 100 - rounded.reduce((s, v) => s + v, 0);
+  rounded[0] += drift;
+  ranked.forEach((m, i) => {
+    w[m] = rounded[i];
   });
   return w;
 }

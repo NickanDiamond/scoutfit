@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, DragEvent } from "react";
 import {
   RadarChart,
   PolarGrid,
@@ -20,6 +20,9 @@ import {
   X,
   ChevronLeft,
   Check,
+  GripVertical,
+  ChevronUp,
+  ChevronDown,
 } from "lucide-react";
 import { CLUBS as SAMPLE_CLUBS, POSITIONS, PLAYERS as SAMPLE_PLAYERS, PositionKey } from "@/lib/sampleData";
 import {
@@ -28,8 +31,7 @@ import {
   METRIC_HELP,
   Metric,
   rankPlayers,
-  equalWeights,
-  topMetrics,
+  rankToWeights,
   valueRatio,
   Weights,
   Player,
@@ -59,7 +61,8 @@ export default function Home() {
   const [clubKey, setClubKey] = useState<string>("");
   const [posKey, setPosKey] = useState<PositionKey | null>(null);
   const [defaultWeights, setDefaultWeights] = useState<Weights | null>(null);
-  const [selectedStats, setSelectedStats] = useState<Metric[]>([]);
+  const [rankedStats, setRankedStats] = useState<Metric[]>([...METRICS]);
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [valueMode, setValueMode] = useState(false);
   const [players, setPlayers] = useState<Player[]>([]);
   const [selected, setSelected] = useState<string[]>([]);
@@ -95,12 +98,40 @@ export default function Home() {
       weights = SAMPLE_CLUBS[clubKey].weights[pos];
     }
     setDefaultWeights(weights);
-    setSelectedStats(weights ? topMetrics(weights, 2) : []);
+    setRankedStats(
+      weights ? [...METRICS].sort((a, b) => weights![b] - weights![a]) : [...METRICS]
+    );
     setStep("stats");
   }
 
-  function toggleStat(m: Metric) {
-    setSelectedStats((prev) => (prev.includes(m) ? prev.filter((x) => x !== m) : [...prev, m]));
+  function moveStat(index: number, direction: -1 | 1) {
+    setRankedStats((prev) => {
+      const next = [...prev];
+      const target = index + direction;
+      if (target < 0 || target >= next.length) return prev;
+      [next[index], next[target]] = [next[target], next[index]];
+      return next;
+    });
+  }
+
+  function handleDragStart(index: number) {
+    setDragIndex(index);
+  }
+
+  function handleDragOver(e: DragEvent, index: number) {
+    e.preventDefault();
+    if (dragIndex === null || dragIndex === index) return;
+    setRankedStats((prev) => {
+      const next = [...prev];
+      const [moved] = next.splice(dragIndex, 1);
+      next.splice(index, 0, moved);
+      return next;
+    });
+    setDragIndex(index);
+  }
+
+  function handleDragEnd() {
+    setDragIndex(null);
   }
 
   async function showResults() {
@@ -123,7 +154,7 @@ export default function Home() {
     setStep("club");
     setClubKey("");
     setPosKey(null);
-    setSelectedStats([]);
+    setRankedStats([...METRICS]);
     setValueMode(false);
     setSelected([]);
     setQuery("");
@@ -134,7 +165,7 @@ export default function Home() {
     if (idx > 0) setStep(STEP_ORDER[idx - 1]);
   }
 
-  const weights = useMemo(() => equalWeights(selectedStats), [selectedStats]);
+  const weights = useMemo(() => rankToWeights(rankedStats), [rankedStats]);
   const ranked = useMemo(() => {
     const byFit = rankPlayers(players, weights);
     if (!valueMode) return byFit;
@@ -259,7 +290,7 @@ export default function Home() {
           <div>
             <h2 className="text-xl font-bold mb-1">What position does {currentClubName} need?</h2>
             <p className="text-slate-500 text-sm mb-6">Pick the position they're looking to fill.</p>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {Object.entries(POSITIONS).map(([key, label]) => (
                 <button
                   key={key}
@@ -273,40 +304,61 @@ export default function Home() {
           </div>
         )}
 
-        {/* Step 3: stats */}
+        {/* Step 3: stats — drag to rank */}
         {step === "stats" && (
           <div>
             <h2 className="text-xl font-bold mb-1">Which stats matter most?</h2>
             <p className="text-slate-500 text-sm mb-6">
-              Pick as many as you like — we've pre-checked what {currentClubName} usually prioritizes.
+              Drag to reorder — rank 1 carries the most weight. We've pre-ranked what{" "}
+              {currentClubName} usually prioritizes; rearrange to match what you're after.
             </p>
             <div className="space-y-2 mb-6">
-              {METRICS.map((m) => {
-                const active = selectedStats.includes(m);
-                return (
-                  <button
-                    key={m}
-                    onClick={() => toggleStat(m)}
-                    className={`w-full flex items-center gap-3 border rounded-xl p-3.5 text-left transition-colors ${
-                      active
-                        ? "border-pitch-500 bg-pitch-500/10"
-                        : "border-slate-800 bg-slate-900/60 hover:border-slate-700"
-                    }`}
-                  >
-                    <span
-                      className={`w-5 h-5 rounded border flex items-center justify-center shrink-0 ${
-                        active ? "bg-pitch-500 border-pitch-500 text-slate-950" : "border-slate-700"
-                      }`}
+              {rankedStats.map((m, i) => (
+                <div
+                  key={m}
+                  draggable
+                  onDragStart={() => handleDragStart(i)}
+                  onDragOver={(e) => handleDragOver(e, i)}
+                  onDragEnd={handleDragEnd}
+                  className={`w-full flex items-center gap-3 border rounded-xl p-3.5 text-left bg-slate-900/60 transition-colors cursor-grab active:cursor-grabbing ${
+                    dragIndex === i ? "border-pitch-500 bg-pitch-500/10" : "border-slate-800"
+                  }`}
+                >
+                  <span className="text-slate-600 shrink-0">
+                    <GripVertical size={16} />
+                  </span>
+                  <span className="w-6 h-6 rounded-full flex items-center justify-center border border-pitch-600/40 text-pitch-400 bg-pitch-500/10 text-[11px] font-semibold shrink-0">
+                    {i + 1}
+                  </span>
+                  <span className="flex-1">
+                    <span className="font-medium text-slate-100">{METRIC_LABELS[m]}</span>
+                    <span className="text-slate-500 text-xs block">{METRIC_HELP[m]}</span>
+                  </span>
+                  <span className="text-xs text-slate-500 tabular-nums shrink-0 hidden sm:inline">
+                    {weights[m]}%
+                  </span>
+                  <span className="flex flex-col shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => moveStat(i, -1)}
+                      disabled={i === 0}
+                      className="text-slate-500 hover:text-white disabled:opacity-20 disabled:hover:text-slate-500"
+                      aria-label={`Move ${METRIC_LABELS[m]} up`}
                     >
-                      {active && <Check size={12} />}
-                    </span>
-                    <span>
-                      <span className="font-medium text-slate-100">{METRIC_LABELS[m]}</span>
-                      <span className="text-slate-500 text-xs block">{METRIC_HELP[m]}</span>
-                    </span>
-                  </button>
-                );
-              })}
+                      <ChevronUp size={14} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => moveStat(i, 1)}
+                      disabled={i === rankedStats.length - 1}
+                      className="text-slate-500 hover:text-white disabled:opacity-20 disabled:hover:text-slate-500"
+                      aria-label={`Move ${METRIC_LABELS[m]} down`}
+                    >
+                      <ChevronDown size={14} />
+                    </button>
+                  </span>
+                </div>
+              ))}
             </div>
 
             <button
@@ -335,7 +387,6 @@ export default function Home() {
 
             <button
               onClick={showResults}
-              disabled={selectedStats.length === 0}
               className="w-full bg-pitch-500 disabled:bg-slate-800 disabled:text-slate-600 text-slate-950 font-semibold rounded-xl py-3 hover:bg-pitch-400 transition-colors"
             >
               Show recommendations
@@ -358,7 +409,7 @@ export default function Home() {
               </button>
             </div>
             <p className="text-slate-500 text-sm mb-6">
-              Ranked by {selectedStats.map((m) => METRIC_LABELS[m]).join(", ")}
+              Ranked by priority: {rankedStats.map((m) => METRIC_LABELS[m]).join(" > ")}
               {valueMode && " — sorted for best value, not just raw fit"}.
             </p>
 

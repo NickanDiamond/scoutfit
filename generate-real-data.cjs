@@ -1,13 +1,28 @@
 // Generates lib/sampleData.ts (offline fallback) AND supabase/seed.sql
 // (real data ready to paste into the Supabase SQL editor) from the same
 // source-of-truth: real 2024-25 Premier League season stats — goals,
-// assists, minutes, creativity, influence, threat, FPL price — from the
-// public vaastav/Fantasy-Premier-League dataset (mirrors the official
-// FPL API). 84 real players across 8 real clubs.
+// assists, minutes, creativity, influence, threat — from the public
+// vaastav/Fantasy-Premier-League dataset (mirrors the official FPL API),
+// plus real current market values (EUR) from Transfermarkt data.
+// 90 real players across 7 granular real positions (Centre-Back,
+// Fullback, Defensive Midfielder, Central Midfielder, Attacking
+// Midfielder, Winger, Striker), sourced from Transfermarkt's own
+// sub_position taxonomy rather than a coarse DEF/MID/FWD split.
+// NOTE: "False Nine" / Second Striker is intentionally not a bucket —
+// zero current Premier League players are tagged that position in the
+// real data, so it can't be backed with real stats without faking it.
 
 const METRICS = ["creativity", "threat", "influence", "productivity", "reliability"];
 const clip = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
-const POSITIONS = { DEF: "Defender", MID: "Midfielder", FWD: "Forward" };
+const POSITIONS = {
+  CB: "Centre-Back",
+  FB: "Fullback",
+  DM: "Defensive Midfielder",
+  CM: "Central Midfielder",
+  CAM: "Attacking Midfielder",
+  WING: "Winger",
+  ST: "Striker",
+};
 const FULL_SEASON_MINUTES = 3420;
 
 // Real current market values (€m), from Transfermarkt data (players.csv /
@@ -98,83 +113,104 @@ const REAL_MARKET_VALUES = {
   "Rodrigo Muniz": 20.0,
   "Jamie Vardy": 1.0,
   "Patson Daka": 0.4,
+  "Moisés Caicedo": 100.0,
+  "Ryan Gravenberch": 80.0,
+  "Carlos Baleba": 55.0,
+  "Amadou Onana": 45.0,
+  "Boubacar Kamara": 40.0,
+  "James Garner": 45.0,
 };
 
 
 // [name, club, goals, assists, minutes, creativity, influence, threat, now_cost(tenths of £m)]
 const RAW = {
-  DEF: [
+  CB: [
     ["W. Saliba", "Arsenal", 2, 0, 3039, 150.1, 672.6, 116.0, 64],
-    ["Gabriel Magalhães", "Arsenal", 3, 2, 2363, 208.8, 584.6, 287.0, 61],
     ["Virgil van Dijk", "Liverpool", 3, 1, 3330, 206.6, 932.6, 299.0, 67],
-    ["Trent Alexander-Arnold", "Liverpool", 3, 7, 2362, 833.7, 723.8, 268.0, 72],
     ["Joško Gvardiol", "Manchester City", 5, 0, 3278, 501.7, 847.0, 497.0, 65],
     ["Rúben Dias", "Manchester City", 0, 0, 2269, 173.8, 478.2, 150.0, 55],
-    ["Marc Cucurella", "Chelsea", 5, 2, 2988, 350.6, 668.6, 358.0, 54],
     ["Marc Guéhi", "Crystal Palace", 3, 2, 3059, 237.6, 827.0, 247.0, 47],
-    ["Milos Kerkez", "Bournemouth", 2, 6, 3336, 642.0, 694.0, 238.0, 53],
     ["Ezri Konsa", "Aston Villa", 2, 0, 2936, 123.9, 532.8, 166.0, 45],
     ["Pau Torres", "Aston Villa", 0, 0, 2019, 84.5, 350.6, 102.0, 42],
-    ["Matty Cash", "Aston Villa", 1, 1, 2069, 181.0, 359.2, 171.0, 44],
-    ["Lucas Digne", "Aston Villa", 0, 5, 2348, 583.9, 512.6, 112.0, 44],
-    ["Adam Smith", "Bournemouth", 0, 0, 1586, 147.2, 181.8, 24.0, 44],
     ["Marcos Senesi", "Bournemouth", 0, 0, 1103, 84.2, 271.6, 39.0, 46],
     ["Nathan Collins", "Brentford", 2, 7, 3420, 160.5, 1023.2, 311.0, 46],
     ["Ethan Pinnock", "Brentford", 2, 0, 1912, 101.2, 540.2, 193.0, 44],
     ["Lewis Dunk", "Brighton", 0, 1, 2081, 115.7, 425.4, 128.0, 42],
-    ["Pervis Estupiñán", "Brighton", 1, 1, 2399, 530.1, 504.4, 173.0, 49],
     ["Jan Paul van Hecke", "Brighton", 1, 1, 2960, 261.8, 736.6, 182.0, 45],
-    ["Daniel Muñoz", "Crystal Palace", 4, 6, 3229, 634.2, 816.6, 524.0, 52],
-    ["Tyrick Mitchell", "Crystal Palace", 0, 6, 3090, 559.1, 630.8, 170.0, 48],
     ["James Tarkowski", "Everton", 1, 1, 2922, 188.8, 859.0, 217.0, 47],
-    ["Vitalii Mykolenko", "Everton", 1, 3, 3082, 428.5, 621.4, 100.0, 44],
     ["Jarrad Branthwaite", "Everton", 0, 1, 2509, 57.7, 624.6, 130.0, 49],
     ["Calvin Bassey", "Fulham", 1, 0, 3074, 96.7, 587.2, 157.0, 45],
-    ["Antonee Robinson", "Fulham", 0, 10, 3166, 723.4, 922.2, 206.0, 47],
     ["Joachim Andersen", "Fulham", 0, 0, 2673, 99.0, 687.6, 162.0, 42],
     ["Wout Faes", "Leicester", 1, 0, 2812, 68.5, 678.0, 121.0, 38],
+  ],
+  FB: [
+    ["Gabriel Magalhães", "Arsenal", 3, 2, 2363, 208.8, 584.6, 287.0, 61],
+    ["Trent Alexander-Arnold", "Liverpool", 3, 7, 2362, 833.7, 723.8, 268.0, 72],
+    ["Marc Cucurella", "Chelsea", 5, 2, 2988, 350.6, 668.6, 358.0, 54],
+    ["Milos Kerkez", "Bournemouth", 2, 6, 3336, 642.0, 694.0, 238.0, 53],
+    ["Matty Cash", "Aston Villa", 1, 1, 2069, 181.0, 359.2, 171.0, 44],
+    ["Lucas Digne", "Aston Villa", 0, 5, 2348, 583.9, 512.6, 112.0, 44],
+    ["Adam Smith", "Bournemouth", 0, 0, 1586, 147.2, 181.8, 24.0, 44],
+    ["Pervis Estupiñán", "Brighton", 1, 1, 2399, 530.1, 504.4, 173.0, 49],
+    ["Daniel Muñoz", "Crystal Palace", 4, 6, 3229, 634.2, 816.6, 524.0, 52],
+    ["Tyrick Mitchell", "Crystal Palace", 0, 6, 3090, 559.1, 630.8, 170.0, 48],
+    ["Vitalii Mykolenko", "Everton", 1, 3, 3082, 428.5, 621.4, 100.0, 44],
+    ["Antonee Robinson", "Fulham", 0, 10, 3166, 723.4, 922.2, 206.0, 47],
     ["James Justin", "Leicester", 2, 2, 2912, 258.5, 615.2, 202.0, 41],
     ["Victor Kristiansen", "Leicester", 0, 1, 2481, 358.6, 519.4, 40.0, 44],
+    ["Keane Lewis-Potter", "Brentford", 1, 5, 3092, 462.2, 542.0, 391.0, 50],
   ],
-  MID: [
-    ["Mohamed Salah", "Liverpool", 29, 18, 3374, 1199.2, 1577.0, 1985.0, 136],
+  DM: [
+    ["Adam Wharton", "Crystal Palace", 0, 2, 1314, 381.4, 261.2, 69.0, 47],
+    ["Idrissa Gueye", "Everton", 0, 3, 3063, 327.2, 522.0, 117.0, 48],
+    ["Moisés Caicedo", "Chelsea", 1, 4, 3351, 568.8, 627.6, 95.0, 55],
+    ["Ryan Gravenberch", "Liverpool", 0, 4, 3160, 473.9, 550.6, 121.0, 50],
+    ["Carlos Baleba", "Brighton", 3, 1, 2660, 343.7, 515.4, 193.0, 48],
+    ["Amadou Onana", "Aston Villa", 3, 0, 1613, 194.8, 358.0, 215.0, 45],
+    ["Boubacar Kamara", "Aston Villa", 1, 0, 1720, 191.0, 326.6, 83.0, 45],
+    ["James Garner", "Everton", 0, 1, 1590, 248.2, 264.8, 93.0, 45],
+  ],
+  CM: [
+    ["Alexis Mac Allister", "Liverpool", 5, 6, 2597, 731.3, 653.4, 357.0, 62],
+    ["Youri Tielemans", "Aston Villa", 3, 7, 3025, 963.1, 799.6, 333.0, 55],
+    ["John McGinn", "Aston Villa", 1, 4, 2217, 500.6, 277.2, 263.0, 52],
+    ["Ryan Christie", "Bournemouth", 2, 3, 2114, 576.8, 514.0, 303.0, 48],
+    ["Lewis Cook", "Bournemouth", 1, 4, 2976, 727.1, 607.0, 114.0, 50],
+    ["Andreas Pereira", "Fulham", 2, 6, 2004, 868.3, 326.6, 300.0, 49],
+  ],
+  CAM: [
     ["Cole Palmer", "Chelsea", 15, 10, 3193, 1259.2, 1068.2, 1052.0, 105],
     ["Bruno Fernandes", "Manchester United", 8, 12, 3017, 1407.7, 1017.8, 587.0, 84],
-    ["Bukayo Saka", "Arsenal", 6, 11, 1724, 842.8, 606.0, 830.0, 104],
     ["Martin Ødegaard", "Arsenal", 3, 9, 2321, 968.7, 524.6, 493.0, 82],
     ["Kevin De Bruyne", "Manchester City", 4, 9, 1694, 920.0, 466.6, 411.0, 95],
     ["Phil Foden", "Manchester City", 7, 3, 1771, 749.0, 448.0, 449.0, 91],
-    ["Alexis Mac Allister", "Liverpool", 5, 6, 2597, 731.3, 653.4, 357.0, 62],
     ["Dominik Szoboszlai", "Liverpool", 6, 10, 2485, 794.8, 589.8, 601.0, 61],
-    ["Youri Tielemans", "Aston Villa", 3, 7, 3025, 963.1, 799.6, 333.0, 55],
-    ["John McGinn", "Aston Villa", 1, 4, 2217, 500.6, 277.2, 263.0, 52],
     ["Morgan Rogers", "Aston Villa", 8, 11, 3115, 722.7, 730.6, 689.0, 58],
     ["Justin Kluivert", "Bournemouth", 12, 6, 2339, 654.1, 700.0, 771.0, 59],
+    ["Eberechi Eze", "Crystal Palace", 8, 8, 2588, 849.2, 685.0, 691.0, 70],
+    ["Abdoulaye Doucouré", "Everton", 3, 2, 2563, 379.4, 352.6, 348.0, 51],
+    ["Emile Smith Rowe", "Fulham", 6, 3, 2036, 422.3, 433.8, 386.0, 50],
+    ["Bilal El Khannouss", "Leicester", 2, 4, 2179, 634.1, 381.6, 191.0, 48],
+  ],
+  WING: [
+    ["Mohamed Salah", "Liverpool", 29, 18, 3374, 1199.2, 1577.0, 1985.0, 136],
+    ["Bukayo Saka", "Arsenal", 6, 11, 1724, 842.8, 606.0, 830.0, 104],
     ["Antoine Semenyo", "Bournemouth", 11, 7, 3202, 688.9, 792.2, 1204.0, 57],
-    ["Ryan Christie", "Bournemouth", 2, 3, 2114, 576.8, 514.0, 303.0, 48],
-    ["Lewis Cook", "Bournemouth", 1, 4, 2976, 727.1, 607.0, 114.0, 50],
     ["Dango Ouattara", "Bournemouth", 7, 4, 1998, 496.8, 624.6, 754.0, 45],
-    ["Keane Lewis-Potter", "Brentford", 1, 5, 3092, 462.2, 542.0, 391.0, 50],
     ["Bryan Mbeumo", "Brentford", 20, 9, 3415, 1107.5, 1236.8, 1060.0, 83],
     ["Kevin Schade", "Brentford", 11, 4, 2281, 312.7, 630.8, 892.0, 53],
     ["Kaoru Mitoma", "Brighton", 10, 5, 2597, 578.0, 670.6, 856.0, 63],
     ["Yankuba Minteh", "Brighton", 6, 5, 1831, 448.9, 523.8, 615.0, 48],
-    ["Georginio Rutter", "Brighton", 5, 6, 1651, 281.8, 355.4, 404.0, 50],
-    ["Eberechi Eze", "Crystal Palace", 8, 8, 2588, 849.2, 685.0, 691.0, 70],
     ["Ismaïla Sarr", "Crystal Palace", 8, 7, 2708, 618.0, 675.0, 866.0, 55],
-    ["Adam Wharton", "Crystal Palace", 0, 2, 1314, 381.4, 261.2, 69.0, 47],
-    ["Abdoulaye Doucouré", "Everton", 3, 2, 2563, 379.4, 352.6, 348.0, 51],
-    ["Idrissa Gueye", "Everton", 0, 3, 3063, 327.2, 522.0, 117.0, 48],
     ["Jack Harrison", "Everton", 1, 3, 2068, 527.7, 277.0, 288.0, 52],
     ["Dwight McNeil", "Everton", 4, 8, 1366, 631.8, 392.0, 207.0, 51],
     ["Alex Iwobi", "Fulham", 9, 6, 2981, 922.4, 806.8, 699.0, 54],
-    ["Andreas Pereira", "Fulham", 2, 6, 2004, 868.3, 326.6, 300.0, 49],
-    ["Emile Smith Rowe", "Fulham", 6, 3, 2036, 422.3, 433.8, 386.0, 50],
     ["Adama Traoré", "Fulham", 2, 8, 1756, 632.1, 385.4, 426.0, 45],
     ["Stephy Mavididi", "Leicester", 4, 1, 1606, 375.3, 339.2, 302.0, 50],
-    ["Bilal El Khannouss", "Leicester", 2, 4, 2179, 634.1, 381.6, 191.0, 48],
+    ["Iliman Ndiaye", "Everton", 9, 0, 2426, 326.4, 598.0, 493.0, 52],
   ],
-  FWD: [
+  ST: [
+    ["Georginio Rutter", "Brighton", 5, 6, 1651, 281.8, 355.4, 404.0, 50],
     ["Erling Haaland", "Manchester City", 22, 3, 2736, 359.4, 946.0, 1511.0, 149],
     ["Ollie Watkins", "Aston Villa", 16, 8, 2593, 345.2, 766.0, 1148.0, 92],
     ["Kai Havertz", "Arsenal", 9, 3, 1872, 269.0, 467.6, 711.0, 77],
@@ -187,7 +223,6 @@ const RAW = {
     ["Jhon Durán", "Aston Villa", 7, 0, 622, 68.9, 273.8, 334.0, 57],
     ["Evanilson", "Bournemouth", 10, 5, 2317, 331.9, 456.0, 966.0, 59],
     ["João Pedro", "Brighton", 10, 6, 1946, 456.0, 567.0, 644.0, 55],
-    ["Iliman Ndiaye", "Everton", 9, 0, 2426, 326.4, 598.0, 493.0, 52],
     ["Dominic Calvert-Lewin", "Everton", 3, 2, 1602, 126.1, 200.2, 573.0, 54],
     ["Rodrigo Muniz", "Fulham", 8, 1, 943, 95.3, 352.4, 508.0, 55],
     ["Jamie Vardy", "Leicester", 9, 5, 2825, 270.8, 490.8, 742.0, 54],
@@ -235,9 +270,13 @@ Object.keys(POSITIONS).forEach((pos) => {
 });
 
 const BASE_WEIGHTS = {
-  DEF: { creativity: 15, threat: 10, influence: 30, productivity: 15, reliability: 30 },
-  MID: { creativity: 30, threat: 15, influence: 20, productivity: 20, reliability: 15 },
-  FWD: { creativity: 10, threat: 35, influence: 15, productivity: 30, reliability: 10 },
+  CB: { creativity: 15, threat: 10, influence: 30, productivity: 15, reliability: 30 },
+  FB: { creativity: 25, threat: 10, influence: 20, productivity: 20, reliability: 25 },
+  DM: { creativity: 15, threat: 5, influence: 35, productivity: 15, reliability: 30 },
+  CM: { creativity: 25, threat: 15, influence: 25, productivity: 20, reliability: 15 },
+  CAM: { creativity: 35, threat: 20, influence: 20, productivity: 20, reliability: 5 },
+  WING: { creativity: 25, threat: 30, influence: 15, productivity: 25, reliability: 5 },
+  ST: { creativity: 10, threat: 35, influence: 15, productivity: 30, reliability: 10 },
 };
 const CLUB_LIST = [
   { key: "arsenal", name: "Arsenal", league: "Premier League", style: "possession" },

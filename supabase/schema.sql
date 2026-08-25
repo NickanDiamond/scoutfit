@@ -15,7 +15,7 @@ create table players (
   id uuid primary key default gen_random_uuid(),
   name text not null,
   club text,
-  position text,           -- 'DEF' | 'MID' | 'FWD'
+  position text,           -- 'CB' | 'FB' | 'DM' | 'CM' | 'CAM' | 'WING' | 'ST'
   price numeric,            -- real market value in €m (Transfermarkt, Aug 2026)
   created_at timestamptz default now()
 );
@@ -35,7 +35,7 @@ create table player_stats (
 create table club_weights (
   id uuid primary key default gen_random_uuid(),
   club_id uuid references clubs(id) on delete cascade,
-  position text not null,   -- 'DEF' | 'MID' | 'FWD'
+  position text not null,   -- 'CB' | 'FB' | 'DM' | 'CM' | 'CAM' | 'WING' | 'ST'
   creativity_weight numeric,
   threat_weight numeric,
   influence_weight numeric,
