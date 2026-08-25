@@ -40,7 +40,7 @@ import {
   Player,
 } from "@/lib/scoring";
 import { isSupabaseConfigured } from "@/lib/supabaseClient";
-import { getClubs, getClubWeights, getPlayersForPosition, getSquadForClub, ClubRow } from "@/lib/db";
+import { getClubs, getClubWeights, getPlayersForPosition, getSquadForClub, getFullSquad, getAllClubWeights, ClubRow } from "@/lib/db";
 
 const COLORS = ["#4f7cff", "#22c55e", "#f2cd6b"];
 const RANK_STYLES = [
@@ -75,6 +75,41 @@ function Jersey({ number, size = 44 }: { number: number | string; size?: number 
   );
 }
 
+interface XISlot {
+  name: string;
+  sub?: string;
+}
+
+// Rows laid out top (attacking third) to bottom (own third), each slot
+// positioned by percentage so the shape reads as a real formation —
+// here a 4-2-3-1 minus the goalkeeper (no real GK data to show).
+function PitchXI({ rows }: { rows: XISlot[][] }) {
+  const rowYs = [10, 34, 58, 84];
+  return (
+    <div className="relative pitch-stripes pitch-markings rounded-xl overflow-hidden" style={{ aspectRatio: "3 / 4" }}>
+      {rows.map((slots, ri) =>
+        slots.map((slot, si) => {
+          const count = slots.length;
+          const x = ((si + 1) / (count + 1)) * 100;
+          return (
+            <div
+              key={`${ri}-${si}`}
+              className="absolute flex flex-col items-center w-20 -translate-x-1/2 -translate-y-1/2 text-center"
+              style={{ left: `${x}%`, top: `${rowYs[ri]}%` }}
+            >
+              <Jersey number={ri * 10 + si + 1} size={38} />
+              <span className="text-white text-[11px] font-semibold mt-0.5 leading-tight drop-shadow truncate max-w-[80px]">
+                {slot?.name ?? "—"}
+              </span>
+              {slot?.sub && <span className="text-white/70 text-[9px] leading-tight">{slot.sub}</span>}
+            </div>
+          );
+        })
+      )}
+    </div>
+  );
+}
+
 export default function Home() {
   const [step, setStep] = useState<Step>("club");
   const [clubs, setClubs] = useState<ClubRow[]>([]);
@@ -86,6 +121,8 @@ export default function Home() {
   const [valueMode, setValueMode] = useState(false);
   const [players, setPlayers] = useState<Player[]>([]);
   const [squad, setSquad] = useState<SquadMember[]>([]);
+  const [fullSquad, setFullSquad] = useState<Partial<Record<PositionKey, SquadMember[]>>>({});
+  const [fullWeights, setFullWeights] = useState<Partial<Record<PositionKey, Weights>>>({});
   const [selected, setSelected] = useState<string[]>([]);
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
@@ -161,11 +198,23 @@ export default function Home() {
     setError(null);
     setLoading(true);
     try {
-      const [p, s] = isSupabaseConfigured
-        ? await Promise.all([getPlayersForPosition(posKey), getSquadForClub(clubKey, posKey)])
-        : [SAMPLE_PLAYERS[posKey], SAMPLE_SQUADS[clubKey]?.[posKey] ?? []];
-      setPlayers(p);
-      setSquad(s);
+      if (isSupabaseConfigured) {
+        const [p, s, fs, fw] = await Promise.all([
+          getPlayersForPosition(posKey),
+          getSquadForClub(clubKey, posKey),
+          getFullSquad(clubKey),
+          getAllClubWeights(clubKey),
+        ]);
+        setPlayers(p);
+        setSquad(s);
+        setFullSquad(fs);
+        setFullWeights(fw);
+      } else {
+        setPlayers(SAMPLE_PLAYERS[posKey]);
+        setSquad(SAMPLE_SQUADS[clubKey]?.[posKey] ?? []);
+        setFullSquad(SAMPLE_SQUADS[clubKey] ?? {});
+        setFullWeights(SAMPLE_CLUBS[clubKey]?.weights ?? {});
+      }
       setStep("results");
     } catch (e: any) {
       setError(e.message);
@@ -181,6 +230,8 @@ export default function Home() {
     setRankedStats([...METRICS]);
     setValueMode(false);
     setSquad([]);
+    setFullSquad({});
+    setFullWeights({});
     setSelected([]);
     setQuery("");
   }
@@ -216,6 +267,27 @@ export default function Home() {
     [squad, weights]
   );
   const bestSquadScore = squadRanked.length > 0 ? squadRanked[0].score : null;
+
+  const startingXI = useMemo(() => {
+    const bestAt = (pos: PositionKey, n: number) => {
+      const members = fullSquad[pos] ?? [];
+      const w = fullWeights[pos];
+      if (!w || members.length === 0) return [];
+      return members
+        .map((m) => ({ ...m, score: fitScore({ name: m.name, cost: 0, stats: m.stats }, w) }))
+        .sort((a, b) => b.score - a.score)
+        .slice(0, n);
+    };
+    return {
+      ST: bestAt("ST", 1),
+      WING: bestAt("WING", 2),
+      CAM: bestAt("CAM", 1),
+      DM: bestAt("DM", 1),
+      CM: bestAt("CM", 1),
+      FB: bestAt("FB", 2),
+      CB: bestAt("CB", 2),
+    };
+  }, [fullSquad, fullWeights]);
 
   function toggleCompare(name: string) {
     setSelected((prev) => {
@@ -454,6 +526,41 @@ export default function Home() {
               Ranked by priority: {rankedStats.map((m) => METRIC_LABELS[m]).join(" > ")}
               {valueMode && " — sorted for best value, not just raw fit"}.
             </p>
+
+            {(() => {
+              const slot = (m: (typeof startingXI)["ST"][number] | undefined, sub: string) =>
+                m ? { name: m.name, sub } : undefined;
+              const xiRows: XISlot[][] = [
+                [slot(startingXI.ST[0], "ST")].filter(Boolean) as XISlot[],
+                [
+                  slot(startingXI.WING[0], "WING"),
+                  slot(startingXI.CAM[0], "CAM"),
+                  slot(startingXI.WING[1], "WING"),
+                ].filter(Boolean) as XISlot[],
+                [slot(startingXI.DM[0], "DM"), slot(startingXI.CM[0], "CM")].filter(Boolean) as XISlot[],
+                [
+                  slot(startingXI.FB[0], "FB"),
+                  slot(startingXI.CB[0], "CB"),
+                  slot(startingXI.CB[1], "CB"),
+                  slot(startingXI.FB[1], "FB"),
+                ].filter(Boolean) as XISlot[],
+              ];
+              const hasAny = xiRows.some((r) => r.length > 0);
+              return hasAny ? (
+                <div className="border border-slate-800 rounded-xl overflow-hidden mb-5">
+                  <div className="flex items-center gap-2 text-slate-300 px-4 py-2.5 bg-slate-900">
+                    <Shield size={14} />
+                    <h3 className="text-xs uppercase tracking-wide font-medium">
+                      {currentClubName}&rsquo;s likely current XI
+                    </h3>
+                    <span className="text-[10px] text-slate-500 ml-auto normal-case">
+                      no GK data · numbers aren&rsquo;t real squad numbers
+                    </span>
+                  </div>
+                  <PitchXI rows={xiRows} />
+                </div>
+              ) : null;
+            })()}
 
             <div className="border border-slate-800 rounded-xl overflow-hidden mb-5">
               <div className="flex items-center gap-2 text-slate-300 px-4 py-2.5 bg-slate-900">

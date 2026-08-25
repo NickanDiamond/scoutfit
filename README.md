@@ -148,6 +148,18 @@ jersey on a pitch background instead of a plain list — the number is
 their rank by fit score under your chosen weights, not a real squad
 number (EA's ratings data doesn't include those).
 
+## Full current XI
+
+Above the single-position comparison, a full-pitch formation view shows
+the club's likely strongest current XI across all 7 positions at once —
+back four, double pivot, attacking three, and a striker (a 4-2-3-1
+shape, since that maps cleanly onto the 7 position buckets). Each slot
+is filled by that position's real squad member with the highest fit
+score under *that position's own* default club weights (not the weights
+for whatever position you're currently scouting). No goalkeeper is
+shown — there's no real goalkeeper rating data in this pool, and the
+jersey numbers are fit-rank placeholders, not real squad numbers.
+
 ## Current squad vs. upgrade
 
 Each of the 12 clubs' real current squads (269 outfield players, EA FC 26
