@@ -139,6 +139,15 @@ stat gets the largest share, the bottom stat the smallest — via
 `rankToWeights` in `lib/scoring.ts`. Arrow buttons are included next to
 each row as a non-drag fallback (keyboard/touch friendly).
 
+## Soccer-themed UI
+
+A pitch-stripe texture (mowed-grass gradient bands + faint halfway-line/
+centre-circle markings) accents the header and step transitions. The
+current-squad comparison (below) renders each player as a numbered
+jersey on a pitch background instead of a plain list — the number is
+their rank by fit score under your chosen weights, not a real squad
+number (EA's ratings data doesn't include those).
+
 ## Current squad vs. upgrade
 
 Each of the 12 clubs' real current squads (269 outfield players, EA FC 26

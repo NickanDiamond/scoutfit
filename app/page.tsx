@@ -58,6 +58,23 @@ const STEP_LABEL: Record<Step, string> = {
   results: "Results",
 };
 
+function Jersey({ number, size = 44 }: { number: number | string; size?: number }) {
+  return (
+    <svg viewBox="0 0 64 64" width={size} height={size} className="drop-shadow-md shrink-0">
+      <path
+        d="M22 3 L10 13 L15 24 L21 20 L21 59 L43 59 L43 20 L49 24 L54 13 L42 3 L34 8 L30 8 Z"
+        fill="#e11d3c"
+        stroke="#7f0f24"
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+      />
+      <text x="32" y="41" textAnchor="middle" fontSize="19" fontWeight="800" fill="white">
+        {number}
+      </text>
+    </svg>
+  );
+}
+
 export default function Home() {
   const [step, setStep] = useState<Step>("club");
   const [clubs, setClubs] = useState<ClubRow[]>([]);
@@ -222,6 +239,7 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-slate-950 text-slate-100">
       <header className="sticky top-0 z-10 border-b border-slate-800/80 bg-slate-950/90 backdrop-blur">
+        <div className="h-1 pitch-stripes" />
         <div className="max-w-3xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-pitch-500 to-blue-600 flex items-center justify-center font-bold text-sm">
@@ -240,7 +258,7 @@ export default function Home() {
             }`}
           >
             {isSupabaseConfigured ? <Database size={13} /> : <WifiOff size={13} />}
-            {isSupabaseConfigured ? "Live database" : "Real 2024-25 season data"}
+            {isSupabaseConfigured ? "Live database" : "Real EA FC 26 ratings"}
           </div>
         </div>
       </header>
@@ -291,6 +309,7 @@ export default function Home() {
         {/* Step 1: club */}
         {step === "club" && (
           <div>
+            <div className="w-10 h-1.5 rounded-full pitch-stripes mb-3" />
             <h2 className="text-xl font-bold mb-1">Which club are you scouting for?</h2>
             <p className="text-slate-500 text-sm mb-6">Pick a club to get started.</p>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -310,6 +329,7 @@ export default function Home() {
         {/* Step 2: position */}
         {step === "position" && (
           <div>
+            <div className="w-10 h-1.5 rounded-full pitch-stripes mb-3" />
             <h2 className="text-xl font-bold mb-1">What position does {currentClubName} need?</h2>
             <p className="text-slate-500 text-sm mb-6">Pick the position they're looking to fill.</p>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -435,36 +455,36 @@ export default function Home() {
               {valueMode && " — sorted for best value, not just raw fit"}.
             </p>
 
-            <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-4 mb-5">
-              <div className="flex items-center gap-2 text-slate-400 mb-3">
+            <div className="border border-slate-800 rounded-xl overflow-hidden mb-5">
+              <div className="flex items-center gap-2 text-slate-300 px-4 py-2.5 bg-slate-900">
                 <Shield size={14} />
                 <h3 className="text-xs uppercase tracking-wide font-medium">
                   {currentClubName}&rsquo;s current {posKey ? POSITIONS[posKey] : ""}s
                 </h3>
+                <span className="text-[10px] text-slate-500 ml-auto normal-case">
+                  numbered by fit rank, not real squad numbers
+                </span>
               </div>
               {squadRanked.length === 0 ? (
-                <p className="text-xs text-slate-600">
+                <p className="text-xs text-slate-500 px-4 py-6 bg-slate-900/60">
                   No current-squad data for this position — can&rsquo;t show an upgrade
                   comparison here, only the ranked targets below.
                 </p>
               ) : (
-                <div className="space-y-1.5">
-                  {squadRanked.map((m) => (
-                    <div key={m.name} className="flex items-center gap-3 text-sm">
-                      <span className="flex-1 text-slate-300">
-                        {m.name} <span className="text-slate-600 text-xs">age {m.age}</span>
-                      </span>
-                      <div className="w-20 h-1.5 bg-slate-800 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-slate-500 rounded-full"
-                          style={{ width: `${m.score}%` }}
-                        />
+                <div className="pitch-stripes pitch-markings px-4 py-5">
+                  <div className="flex flex-wrap justify-center gap-x-5 gap-y-4">
+                    {squadRanked.map((m, i) => (
+                      <div key={m.name} className="flex flex-col items-center w-20 text-center">
+                        <Jersey number={i + 1} />
+                        <span className="text-white text-xs font-semibold mt-1 leading-tight drop-shadow">
+                          {m.name}
+                        </span>
+                        <span className="text-white/70 text-[10px] leading-tight">
+                          age {m.age} · fit {m.score.toFixed(0)}
+                        </span>
                       </div>
-                      <span className="font-medium tabular-nums text-slate-400 w-8 text-right text-xs">
-                        {m.score.toFixed(0)}
-                      </span>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
               )}
             </div>

@@ -1,3 +1,28 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+
+/* Soccer pitch texture: alternating mowed-grass stripes, used behind the
+   header and the current-squad panel for a football-pitch feel. */
+.pitch-stripes {
+  background-color: #1a7a3c;
+  background-image: repeating-linear-gradient(
+    100deg,
+    rgba(255, 255, 255, 0.05) 0px,
+    rgba(255, 255, 255, 0.05) 40px,
+    rgba(0, 0, 0, 0.06) 40px,
+    rgba(0, 0, 0, 0.06) 80px
+  );
+}
+
+/* Faint pitch markings (halfway line + centre circle) as a decorative
+   background layer — purely cosmetic, sits behind content. */
+.pitch-markings {
+  background-image:
+    radial-gradient(circle at 50% 50%, transparent 0, transparent 38px, rgba(255,255,255,0.14) 39px, rgba(255,255,255,0.14) 40px, transparent 41px),
+    linear-gradient(rgba(255,255,255,0.14), rgba(255,255,255,0.14));
+  background-repeat: no-repeat, no-repeat;
+  background-position: center, center;
+  background-size: 100px 100px, 100% 2px;
+}
