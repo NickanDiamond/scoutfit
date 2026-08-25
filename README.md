@@ -80,19 +80,23 @@ data only, no filler.
    and anon key (Project Settings → API).
 5. Restart `npm run dev` — the badge switches to "Live database" once
    real env vars are detected.
-6. To grow past 88 players: add more rows to the `RAW` object in
+6. To grow past 88 targets or 269 squad players: add more rows to the `RAW` / `RAW_SQUAD` objects in
    `generate-real-data.cjs` (same real-data source, more clubs/players),
    regenerate, and re-run the new `supabase/seed.sql`.
-7. **If you're upgrading from an earlier version** (either the old
-   3-position DEF/MID/FWD scheme, or the previous 7-position version
-   with FPL-derived stats), the column names in `player_stats` and
-   `club_weights` have changed (pace/shooting/passing/... instead of
+7. **If you're upgrading from an earlier version** — any version before
+   this one is missing the `squad_players` table (new), and earlier
+   versions also used different column names in `player_stats` /
+   `club_weights` (pace/shooting/passing/... instead of the old
    creativity/threat/influence/...). Drop and recreate everything:
    ```sql
-   drop table if exists saved_analyses, player_stats, club_weights, players, clubs cascade;
+   drop table if exists saved_analyses, squad_players, player_stats, club_weights, players, clubs cascade;
    ```
    then paste and run the new `supabase/schema.sql`, then the new
-   `supabase/seed.sql`.
+   `supabase/seed.sql`. (If you only need to add `squad_players` without
+   touching existing data, you can instead just run the `create table
+   squad_players (...)` block from `schema.sql` on its own, then re-run
+   `seed.sql` — it'll error on duplicate club/player rows, so truncate
+   `clubs, players cascade` first if you go that route.)
 
 ## How the scoring works
 
@@ -134,6 +138,23 @@ ordered list of all 7 dimensions. Order determines weight — the top
 stat gets the largest share, the bottom stat the smallest — via
 `rankToWeights` in `lib/scoring.ts`. Arrow buttons are included next to
 each row as a non-drag fallback (keyboard/touch friendly).
+
+## Current squad vs. upgrade
+
+Each of the 12 clubs' real current squads (269 outfield players, EA FC 26
+ratings) is pulled from the same source as the scouting targets. On the
+results step, a "current squad" panel shows who the club actually has at
+that position today, scored with the exact same weights you picked — so
+it's a genuine apples-to-apples comparison, not a separate scale that
+happens to look similar.
+
+Squad players are normalized against the *target pool's* min/max bounds
+(computed once in `generate-real-data.cjs`, not per-club), so a fit
+score of 76 means the same thing whether it's a player you already have
+or one you're scouting. Any transfer target whose score beats the
+club's best current option at that position gets a small "+N upgrade"
+badge — only shown when it's a real, positive difference, not asserted
+for every recommendation.
 
 ## Next steps
 

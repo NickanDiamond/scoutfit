@@ -23,8 +23,10 @@ import {
   GripVertical,
   ChevronUp,
   ChevronDown,
+  Shield,
+  TrendingUp,
 } from "lucide-react";
-import { CLUBS as SAMPLE_CLUBS, POSITIONS, PLAYERS as SAMPLE_PLAYERS, PositionKey } from "@/lib/sampleData";
+import { CLUBS as SAMPLE_CLUBS, POSITIONS, PLAYERS as SAMPLE_PLAYERS, SQUADS as SAMPLE_SQUADS, PositionKey, SquadMember } from "@/lib/sampleData";
 import {
   METRICS,
   METRIC_LABELS,
@@ -33,11 +35,12 @@ import {
   rankPlayers,
   rankToWeights,
   valueScores,
+  fitScore,
   Weights,
   Player,
 } from "@/lib/scoring";
 import { isSupabaseConfigured } from "@/lib/supabaseClient";
-import { getClubs, getClubWeights, getPlayersForPosition, ClubRow } from "@/lib/db";
+import { getClubs, getClubWeights, getPlayersForPosition, getSquadForClub, ClubRow } from "@/lib/db";
 
 const COLORS = ["#4f7cff", "#22c55e", "#f2cd6b"];
 const RANK_STYLES = [
@@ -65,6 +68,7 @@ export default function Home() {
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [valueMode, setValueMode] = useState(false);
   const [players, setPlayers] = useState<Player[]>([]);
+  const [squad, setSquad] = useState<SquadMember[]>([]);
   const [selected, setSelected] = useState<string[]>([]);
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
@@ -140,8 +144,11 @@ export default function Home() {
     setError(null);
     setLoading(true);
     try {
-      const p = isSupabaseConfigured ? await getPlayersForPosition(posKey) : SAMPLE_PLAYERS[posKey];
+      const [p, s] = isSupabaseConfigured
+        ? await Promise.all([getPlayersForPosition(posKey), getSquadForClub(clubKey, posKey)])
+        : [SAMPLE_PLAYERS[posKey], SAMPLE_SQUADS[clubKey]?.[posKey] ?? []];
       setPlayers(p);
+      setSquad(s);
       setStep("results");
     } catch (e: any) {
       setError(e.message);
@@ -156,6 +163,7 @@ export default function Home() {
     setPosKey(null);
     setRankedStats([...METRICS]);
     setValueMode(false);
+    setSquad([]);
     setSelected([]);
     setQuery("");
   }
@@ -183,6 +191,14 @@ export default function Home() {
     () => ranked.filter((p) => p.name.toLowerCase().includes(query.toLowerCase())),
     [ranked, query]
   );
+  const squadRanked = useMemo(
+    () =>
+      squad
+        .map((m) => ({ ...m, score: fitScore({ name: m.name, cost: 0, stats: m.stats }, weights) }))
+        .sort((a, b) => b.score - a.score),
+    [squad, weights]
+  );
+  const bestSquadScore = squadRanked.length > 0 ? squadRanked[0].score : null;
 
   function toggleCompare(name: string) {
     setSelected((prev) => {
@@ -419,6 +435,40 @@ export default function Home() {
               {valueMode && " — sorted for best value, not just raw fit"}.
             </p>
 
+            <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-4 mb-5">
+              <div className="flex items-center gap-2 text-slate-400 mb-3">
+                <Shield size={14} />
+                <h3 className="text-xs uppercase tracking-wide font-medium">
+                  {currentClubName}&rsquo;s current {posKey ? POSITIONS[posKey] : ""}s
+                </h3>
+              </div>
+              {squadRanked.length === 0 ? (
+                <p className="text-xs text-slate-600">
+                  No current-squad data for this position — can&rsquo;t show an upgrade
+                  comparison here, only the ranked targets below.
+                </p>
+              ) : (
+                <div className="space-y-1.5">
+                  {squadRanked.map((m) => (
+                    <div key={m.name} className="flex items-center gap-3 text-sm">
+                      <span className="flex-1 text-slate-300">
+                        {m.name} <span className="text-slate-600 text-xs">age {m.age}</span>
+                      </span>
+                      <div className="w-20 h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-slate-500 rounded-full"
+                          style={{ width: `${m.score}%` }}
+                        />
+                      </div>
+                      <span className="font-medium tabular-nums text-slate-400 w-8 text-right text-xs">
+                        {m.score.toFixed(0)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
             <div className="relative mb-4">
               <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
               <input
@@ -473,7 +523,14 @@ export default function Home() {
                             <span className="text-slate-600 pl-1.5">{i + 1}</span>
                           )}
                         </td>
-                        <td className="font-medium text-slate-200">{p.name}</td>
+                        <td className="font-medium text-slate-200">
+                          {p.name}
+                          {bestSquadScore !== null && p.score > bestSquadScore && (
+                            <span className="ml-2 inline-flex items-center gap-0.5 text-[10px] font-semibold text-pitch-400 bg-pitch-500/10 border border-pitch-600/40 rounded-full px-1.5 py-0.5 align-middle">
+                              <TrendingUp size={9} />+{(p.score - bestSquadScore).toFixed(0)}
+                            </span>
+                          )}
+                        </td>
                         <td className="text-slate-400">€{p.cost}m</td>
                         <td>
                           <div className="flex items-center gap-2">

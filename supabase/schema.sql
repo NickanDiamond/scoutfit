@@ -53,3 +53,22 @@ create table saved_analyses (
   position text,
   created_at timestamptz default now()
 );
+
+-- A club's real current squad at each position (EA Sports FC 26 ratings),
+-- normalized against the same bounds as the scouting target pool so a
+-- squad player's fit score is directly comparable to a transfer
+-- target's fit score. Powers the "vs your current squad" comparison.
+create table squad_players (
+  id uuid primary key default gen_random_uuid(),
+  club_id uuid references clubs(id) on delete cascade,
+  name text not null,
+  position text not null,   -- 'CB' | 'FB' | 'DM' | 'CM' | 'CAM' | 'WING' | 'ST'
+  pace numeric,
+  shooting numeric,
+  passing numeric,
+  dribbling numeric,
+  defending numeric,
+  physical numeric,
+  youth numeric,            -- pre-normalized from age (younger = higher), see generate-real-data.cjs
+  age numeric                -- raw age, for display only
+);

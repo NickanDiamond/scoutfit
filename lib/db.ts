@@ -1,6 +1,6 @@
 import { supabase } from "./supabaseClient";
 import { Player, Weights, minMaxNormalize } from "./scoring";
-import { PositionKey } from "./sampleData";
+import { PositionKey, SquadMember } from "./sampleData";
 
 export const DEFAULT_SEASON = "FC26";
 
@@ -114,6 +114,51 @@ export async function getPlayersForPosition(
       defending: nDefending[i],
       physical: nPhysical[i],
       youth: nYouth[i],
+    },
+  }));
+}
+
+
+interface RawSquadRow {
+  name: string;
+  age: number;
+  pace: number | null;
+  shooting: number | null;
+  passing: number | null;
+  dribbling: number | null;
+  defending: number | null;
+  physical: number | null;
+  youth: number | null;
+}
+
+// A club's real current squad at a position. Values in Supabase are
+// pre-normalized at generation time (see generate-real-data.cjs BOUNDS)
+// against the same scale as the target pool, so they're returned as-is
+// — no live re-normalization, which would break the apples-to-apples
+// comparison with scouting targets.
+export async function getSquadForClub(
+  clubId: string,
+  position: PositionKey
+): Promise<SquadMember[]> {
+  if (!supabase) return [];
+  const { data, error } = await supabase
+    .from("squad_players")
+    .select("name, age, pace, shooting, passing, dribbling, defending, physical, youth")
+    .eq("club_id", clubId)
+    .eq("position", position);
+  if (error) throw error;
+  const rows = (data ?? []) as RawSquadRow[];
+  return rows.map((r) => ({
+    name: r.name,
+    age: r.age,
+    stats: {
+      pace: r.pace ?? 0,
+      shooting: r.shooting ?? 0,
+      passing: r.passing ?? 0,
+      dribbling: r.dribbling ?? 0,
+      defending: r.defending ?? 0,
+      physical: r.physical ?? 0,
+      youth: r.youth ?? 0, // pre-normalized at write time (generate-real-data.cjs), same scale as the target pool
     },
   }));
 }

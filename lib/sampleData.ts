@@ -278,3 +278,470 @@ export const PLAYERS: Record<PositionKey, Player[]> = {
     { name: "Patson Daka", cost: 0.4, stats: { pace: 100, shooting: 0, passing: 0, dribbling: 36, defending: 0, physical: 0, youth: 62 } },
   ],
 };
+
+export interface SquadMember {
+  name: string;
+  age: number;
+  stats: import("./scoring").PlayerStats;
+}
+
+// Each club's real current squad (EA FC 26), normalized onto the same
+// scale as PLAYERS above so fit scores are directly comparable — used to
+// show "here's what you already have" next to scouting recommendations.
+export const SQUADS: Record<string, Partial<Record<PositionKey, SquadMember[]>>> = {
+  arsenal: {
+    CB: [
+      { name: "Gabriel", age: 28, stats: { pace: 61, shooting: 33, passing: 48, dribbling: 32, defending: 88, physical: 79, youth: 55 } },
+      { name: "William Saliba", age: 25, stats: { pace: 91, shooting: 20, passing: 67, dribbling: 68, defending: 82, physical: 71, youth: 82 } },
+      { name: "Piero Hincapié", age: 24, stats: { pace: 100, shooting: 25, passing: 52, dribbling: 68, defending: 65, physical: 64, youth: 91 } },
+      { name: "Mosquera", age: 21, stats: { pace: 84, shooting: 38, passing: 29, dribbling: 0, defending: 29, physical: 21, youth: 100 } },
+    ],
+    FB: [
+      { name: "Benjamin White", age: 28, stats: { pace: 36, shooting: 0, passing: 44, dribbling: 67, defending: 72, physical: 70, youth: 50 } },
+      { name: "Jurriën Timber", age: 24, stats: { pace: 57, shooting: 23, passing: 32, dribbling: 80, defending: 67, physical: 80, youth: 83 } },
+      { name: "Myles Lewis-Skelly", age: 19, stats: { pace: 57, shooting: 61, passing: 40, dribbling: 80, defending: 28, physical: 70, youth: 100 } },
+      { name: "Riccardo Calafiori", age: 23, stats: { pace: 43, shooting: 81, passing: 28, dribbling: 67, defending: 39, physical: 65, youth: 92 } },
+    ],
+    DM: [
+      { name: "Declan Rice", age: 27, stats: { pace: 78, shooting: 86, passing: 100, dribbling: 62, defending: 92, physical: 100, youth: 64 } },
+      { name: "Zubimendi", age: 27, stats: { pace: 44, shooting: 57, passing: 82, dribbling: 54, defending: 69, physical: 31, youth: 64 } },
+      { name: "Christian Nørgaard", age: 32, stats: { pace: 0, shooting: 48, passing: 36, dribbling: 0, defending: 62, physical: 77, youth: 29 } },
+    ],
+    CM: [
+      { name: "Martin Ødegaard", age: 27, stats: { pace: 93, shooting: 84, passing: 100, dribbling: 100, defending: 0, physical: 0, youth: 100 } },
+      { name: "Mikel Merino", age: 29, stats: { pace: 60, shooting: 84, passing: 38, dribbling: 38, defending: 100, physical: 73, youth: 50 } },
+    ],
+    CAM: [
+      { name: "Eberechi Eze", age: 27, stats: { pace: 62, shooting: 84, passing: 48, dribbling: 88, defending: 32, physical: 48, youth: 54 } },
+    ],
+    WING: [
+      { name: "Bukayo Saka", age: 24, stats: { pace: 63, shooting: 74, passing: 95, dribbling: 87, defending: 100, physical: 64, youth: 75 } },
+      { name: "Leandro Trossard", age: 31, stats: { pace: 48, shooting: 70, passing: 70, dribbling: 67, defending: 6, physical: 12, youth: 17 } },
+      { name: "Gabriel Martinelli", age: 24, stats: { pace: 85, shooting: 52, passing: 45, dribbling: 53, defending: 56, physical: 60, youth: 75 } },
+      { name: "Noni Madueke", age: 24, stats: { pace: 78, shooting: 43, passing: 40, dribbling: 53, defending: 53, physical: 48, youth: 75 } },
+      { name: "Ethan Nwaneri", age: 19, stats: { pace: 56, shooting: 22, passing: 40, dribbling: 20, defending: 69, physical: 0, youth: 100 } },
+    ],
+    ST: [
+      { name: "Viktor Gyökeres", age: 27, stats: { pace: 100, shooting: 75, passing: 75, dribbling: 100, defending: 29, physical: 100, youth: 62 } },
+      { name: "Kai Havertz", age: 26, stats: { pace: 52, shooting: 40, passing: 100, dribbling: 100, defending: 65, physical: 33, youth: 69 } },
+      { name: "Gabriel Jesus", age: 28, stats: { pace: 83, shooting: 40, passing: 80, dribbling: 100, defending: 38, physical: 19, youth: 54 } },
+    ],
+  },
+  liverpool: {
+    CB: [
+      { name: "Virgil van Dijk", age: 34, stats: { pace: 82, shooting: 73, passing: 86, dribbling: 68, defending: 100, physical: 100, youth: 0 } },
+      { name: "Ibrahima Konaté", age: 26, stats: { pace: 91, shooting: 8, passing: 43, dribbling: 53, defending: 76, physical: 86, youth: 73 } },
+      { name: "Joe Gomez", age: 28, stats: { pace: 84, shooting: 0, passing: 76, dribbling: 63, defending: 35, physical: 0, youth: 55 } },
+      { name: "Giovanni Leoni", age: 19, stats: { pace: 36, shooting: 0, passing: 0, dribbling: 0, defending: 0, physical: 0, youth: 100 } },
+      { name: "Rhys Williams", age: 25, stats: { pace: 61, shooting: 10, passing: 0, dribbling: 0, defending: 0, physical: 0, youth: 82 } },
+    ],
+    FB: [
+      { name: "Jeremie Frimpong", age: 25, stats: { pace: 100, shooting: 68, passing: 40, dribbling: 100, defending: 11, physical: 0, youth: 75 } },
+      { name: "Milos Kerkez", age: 22, stats: { pace: 96, shooting: 58, passing: 44, dribbling: 87, defending: 39, physical: 80, youth: 100 } },
+      { name: "Andrew Robertson", age: 32, stats: { pace: 50, shooting: 65, passing: 64, dribbling: 80, defending: 50, physical: 55, youth: 17 } },
+      { name: "Conor Bradley", age: 22, stats: { pace: 71, shooting: 65, passing: 24, dribbling: 67, defending: 28, physical: 50, youth: 100 } },
+      { name: "Calvin Ramsay", age: 22, stats: { pace: 57, shooting: 16, passing: 0, dribbling: 0, defending: 0, physical: 0, youth: 100 } },
+    ],
+    DM: [
+      { name: "Ryan Gravenberch", age: 23, stats: { pace: 100, shooting: 100, passing: 100, dribbling: 100, defending: 77, physical: 92, youth: 93 } },
+      { name: "Wataru Endo", age: 33, stats: { pace: 0, shooting: 62, passing: 9, dribbling: 38, defending: 62, physical: 31, youth: 21 } },
+      { name: "Stefan Bajcetic", age: 21, stats: { pace: 89, shooting: 0, passing: 0, dribbling: 8, defending: 0, physical: 15, youth: 100 } },
+    ],
+    CM: [
+      { name: "Alexis Mac Allister", age: 27, stats: { pace: 80, shooting: 100, passing: 100, dribbling: 100, defending: 100, physical: 36, youth: 100 } },
+      { name: "Trey Nyoni", age: 18, stats: { pace: 87, shooting: 0, passing: 0, dribbling: 0, defending: 0, physical: 0, youth: 100 } },
+    ],
+    CAM: [
+      { name: "Florian Wirtz", age: 22, stats: { pace: 79, shooting: 95, passing: 81, dribbling: 100, defending: 43, physical: 44, youth: 92 } },
+      { name: "Dominik Szoboszlai", age: 25, stats: { pace: 76, shooting: 95, passing: 62, dribbling: 56, defending: 78, physical: 80, youth: 69 } },
+      { name: "Curtis Jones", age: 25, stats: { pace: 62, shooting: 53, passing: 24, dribbling: 56, defending: 92, physical: 80, youth: 69 } },
+    ],
+    WING: [
+      { name: "Mohamed Salah", age: 33, stats: { pace: 81, shooting: 100, passing: 100, dribbling: 100, defending: 53, physical: 76, youth: 0 } },
+      { name: "Cody Gakpo", age: 26, stats: { pace: 59, shooting: 74, passing: 70, dribbling: 53, defending: 59, physical: 68, youth: 58 } },
+      { name: "Federico Chiesa", age: 28, stats: { pace: 74, shooting: 65, passing: 45, dribbling: 53, defending: 50, physical: 44, youth: 42 } },
+      { name: "Rio Ngumoha", age: 17, stats: { pace: 85, shooting: 0, passing: 0, dribbling: 0, defending: 22, physical: 0, youth: 100 } },
+    ],
+    ST: [
+      { name: "Alexander Isak", age: 26, stats: { pace: 90, shooting: 90, passing: 75, dribbling: 100, defending: 38, physical: 43, youth: 69 } },
+      { name: "Hugo Ekitiké", age: 23, stats: { pace: 100, shooting: 35, passing: 55, dribbling: 100, defending: 21, physical: 29, youth: 92 } },
+    ],
+  },
+  mancity: {
+    CB: [
+      { name: "Rúben Dias", age: 28, stats: { pace: 50, shooting: 20, passing: 71, dribbling: 53, defending: 76, physical: 79, youth: 55 } },
+      { name: "Nathan Aké", age: 31, stats: { pace: 80, shooting: 55, passing: 86, dribbling: 84, defending: 65, physical: 7, youth: 27 } },
+      { name: "John Stones", age: 31, stats: { pace: 61, shooting: 68, passing: 95, dribbling: 84, defending: 65, physical: 0, youth: 27 } },
+      { name: "Abdukodir Khusanov", age: 22, stats: { pace: 100, shooting: 20, passing: 24, dribbling: 26, defending: 24, physical: 21, youth: 100 } },
+    ],
+    FB: [
+      { name: "Joško Gvardiol", age: 24, stats: { pace: 64, shooting: 97, passing: 44, dribbling: 87, defending: 78, physical: 90, youth: 83 } },
+      { name: "Rayan Aït-Nouri", age: 24, stats: { pace: 86, shooting: 39, passing: 48, dribbling: 100, defending: 39, physical: 30, youth: 83 } },
+      { name: "Matheus Nunes", age: 27, stats: { pace: 89, shooting: 94, passing: 48, dribbling: 93, defending: 17, physical: 60, youth: 58 } },
+      { name: "Rico Lewis", age: 21, stats: { pace: 57, shooting: 42, passing: 40, dribbling: 93, defending: 17, physical: 0, youth: 100 } },
+      { name: "Nico O'Reilly", age: 21, stats: { pace: 46, shooting: 81, passing: 32, dribbling: 53, defending: 0, physical: 30, youth: 100 } },
+    ],
+    DM: [
+      { name: "Rodri", age: 29, stats: { pace: 39, shooting: 100, passing: 100, dribbling: 92, defending: 100, physical: 100, youth: 50 } },
+      { name: "Nico González", age: 24, stats: { pace: 50, shooting: 71, passing: 64, dribbling: 38, defending: 23, physical: 85, youth: 86 } },
+      { name: "Kalvin Phillips", age: 30, stats: { pace: 0, shooting: 48, passing: 27, dribbling: 0, defending: 8, physical: 8, youth: 43 } },
+    ],
+    CM: [
+      { name: "Tijjani Reijnders", age: 27, stats: { pace: 100, shooting: 84, passing: 63, dribbling: 100, defending: 75, physical: 45, youth: 100 } },
+      { name: "Bernardo Silva", age: 31, stats: { pace: 47, shooting: 79, passing: 75, dribbling: 100, defending: 0, physical: 0, youth: 0 } },
+      { name: "Mateo Kovačić", age: 31, stats: { pace: 87, shooting: 58, passing: 50, dribbling: 75, defending: 0, physical: 0, youth: 0 } },
+    ],
+    WING: [
+      { name: "Phil Foden", age: 25, stats: { pace: 52, shooting: 70, passing: 80, dribbling: 93, defending: 91, physical: 0, youth: 67 } },
+      { name: "Savinho", age: 21, stats: { pace: 74, shooting: 26, passing: 60, dribbling: 73, defending: 6, physical: 0, youth: 100 } },
+      { name: "Rayan Cherki", age: 22, stats: { pace: 30, shooting: 43, passing: 70, dribbling: 87, defending: 0, physical: 32, youth: 92 } },
+      { name: "Jérémy Doku", age: 23, stats: { pace: 89, shooting: 26, passing: 30, dribbling: 80, defending: 13, physical: 44, youth: 83 } },
+      { name: "Oscar Bobb", age: 22, stats: { pace: 44, shooting: 0, passing: 25, dribbling: 13, defending: 16, physical: 0, youth: 92 } },
+    ],
+    ST: [
+      { name: "Erling Haaland", age: 25, stats: { pace: 100, shooting: 100, passing: 60, dribbling: 91, defending: 56, physical: 100, youth: 77 } },
+      { name: "Omar Marmoush", age: 27, stats: { pace: 100, shooting: 70, passing: 90, dribbling: 100, defending: 24, physical: 19, youth: 62 } },
+    ],
+  },
+  manutd: {
+    CB: [
+      { name: "Matthijs de Ligt", age: 26, stats: { pace: 57, shooting: 75, passing: 38, dribbling: 42, defending: 53, physical: 71, youth: 73 } },
+      { name: "Lisandro Martínez", age: 28, stats: { pace: 68, shooting: 70, passing: 100, dribbling: 84, defending: 47, physical: 50, youth: 55 } },
+      { name: "Harry Maguire", age: 33, stats: { pace: 0, shooting: 65, passing: 76, dribbling: 32, defending: 41, physical: 64, youth: 9 } },
+      { name: "Luke Shaw", age: 30, stats: { pace: 73, shooting: 65, passing: 100, dribbling: 84, defending: 35, physical: 0, youth: 36 } },
+      { name: "Leny Yoro", age: 20, stats: { pace: 73, shooting: 25, passing: 29, dribbling: 26, defending: 35, physical: 0, youth: 100 } },
+      { name: "Ayden Heaven", age: 19, stats: { pace: 73, shooting: 0, passing: 0, dribbling: 0, defending: 0, physical: 0, youth: 100 } },
+      { name: "Tyler Fredricson", age: 21, stats: { pace: 64, shooting: 0, passing: 0, dribbling: 0, defending: 0, physical: 0, youth: 100 } },
+    ],
+    FB: [
+      { name: "Noussair Mazraoui", age: 28, stats: { pace: 54, shooting: 81, passing: 48, dribbling: 100, defending: 39, physical: 40, youth: 50 } },
+      { name: "Diogo Dalot", age: 27, stats: { pace: 89, shooting: 71, passing: 40, dribbling: 80, defending: 33, physical: 70, youth: 58 } },
+      { name: "Tyrell Malacia", age: 26, stats: { pace: 61, shooting: 42, passing: 8, dribbling: 67, defending: 11, physical: 35, youth: 67 } },
+      { name: "Patrick Dorgu", age: 21, stats: { pace: 93, shooting: 58, passing: 20, dribbling: 60, defending: 0, physical: 45, youth: 100 } },
+      { name: "Diego León", age: 18, stats: { pace: 82, shooting: 32, passing: 0, dribbling: 7, defending: 0, physical: 0, youth: 100 } },
+    ],
+    DM: [
+      { name: "Casemiro", age: 34, stats: { pace: 0, shooting: 90, passing: 55, dribbling: 0, defending: 69, physical: 54, youth: 14 } },
+      { name: "Manuel Ugarte", age: 24, stats: { pace: 22, shooting: 48, passing: 18, dribbling: 31, defending: 46, physical: 46, youth: 86 } },
+    ],
+    CM: [
+      { name: "Kobbie Mainoo", age: 20, stats: { pace: 93, shooting: 32, passing: 0, dribbling: 50, defending: 0, physical: 18, youth: 100 } },
+    ],
+    CAM: [
+      { name: "Bruno Fernandes", age: 31, stats: { pace: 41, shooting: 100, passing: 86, dribbling: 63, defending: 73, physical: 76, youth: 23 } },
+      { name: "Matheus Cunha", age: 26, stats: { pace: 71, shooting: 100, passing: 38, dribbling: 69, defending: 16, physical: 76, youth: 62 } },
+      { name: "Amad", age: 23, stats: { pace: 94, shooting: 53, passing: 19, dribbling: 63, defending: 43, physical: 0, youth: 85 } },
+      { name: "Mason Mount", age: 27, stats: { pace: 41, shooting: 63, passing: 38, dribbling: 31, defending: 65, physical: 20, youth: 54 } },
+    ],
+    WING: [
+      { name: "Bryan Mbeumo", age: 26, stats: { pace: 78, shooting: 83, passing: 65, dribbling: 60, defending: 66, physical: 76, youth: 58 } },
+    ],
+    ST: [
+      { name: "Benjamin Šeško", age: 22, stats: { pace: 90, shooting: 45, passing: 35, dribbling: 73, defending: 59, physical: 62, youth: 100 } },
+      { name: "Joshua Zirkzee", age: 24, stats: { pace: 48, shooting: 25, passing: 70, dribbling: 100, defending: 44, physical: 43, youth: 85 } },
+      { name: "Chido Obi", age: 18, stats: { pace: 48, shooting: 0, passing: 0, dribbling: 0, defending: 6, physical: 0, youth: 100 } },
+    ],
+  },
+  chelsea: {
+    CB: [
+      { name: "Levi Colwill", age: 23, stats: { pace: 75, shooting: 30, passing: 81, dribbling: 68, defending: 47, physical: 50, youth: 100 } },
+      { name: "Trevoh Chalobah", age: 26, stats: { pace: 66, shooting: 55, passing: 71, dribbling: 58, defending: 41, physical: 36, youth: 73 } },
+      { name: "Wesley Fofana", age: 25, stats: { pace: 84, shooting: 25, passing: 38, dribbling: 63, defending: 41, physical: 36, youth: 82 } },
+      { name: "Tosin Adarabioyo", age: 28, stats: { pace: 75, shooting: 38, passing: 43, dribbling: 26, defending: 29, physical: 43, youth: 55 } },
+      { name: "Axel Disasi", age: 28, stats: { pace: 43, shooting: 43, passing: 29, dribbling: 0, defending: 24, physical: 43, youth: 55 } },
+      { name: "Benoît Badiashile", age: 25, stats: { pace: 52, shooting: 35, passing: 48, dribbling: 16, defending: 18, physical: 29, youth: 82 } },
+    ],
+    FB: [
+      { name: "Marc Cucurella", age: 27, stats: { pace: 54, shooting: 74, passing: 60, dribbling: 100, defending: 67, physical: 75, youth: 58 } },
+      { name: "Reece James", age: 26, stats: { pace: 57, shooting: 97, passing: 72, dribbling: 80, defending: 61, physical: 85, youth: 67 } },
+      { name: "Malo Gusto", age: 22, stats: { pace: 86, shooting: 13, passing: 44, dribbling: 87, defending: 17, physical: 50, youth: 100 } },
+      { name: "Jorrel Hato", age: 20, stats: { pace: 89, shooting: 0, passing: 24, dribbling: 60, defending: 28, physical: 45, youth: 100 } },
+      { name: "Josh Acheampong", age: 19, stats: { pace: 57, shooting: 29, passing: 4, dribbling: 27, defending: 0, physical: 45, youth: 100 } },
+    ],
+    DM: [
+      { name: "Moisés Caicedo", age: 24, stats: { pace: 72, shooting: 43, passing: 73, dribbling: 69, defending: 100, physical: 100, youth: 86 } },
+      { name: "Romeo Lavia", age: 22, stats: { pace: 61, shooting: 0, passing: 18, dribbling: 38, defending: 46, physical: 46, youth: 100 } },
+      { name: "Dário Essugo", age: 21, stats: { pace: 100, shooting: 14, passing: 0, dribbling: 8, defending: 23, physical: 92, youth: 100 } },
+    ],
+    CM: [
+      { name: "Enzo Fernández", age: 25, stats: { pace: 93, shooting: 63, passing: 100, dribbling: 50, defending: 0, physical: 27, youth: 100 } },
+      { name: "Andrey Santos", age: 21, stats: { pace: 100, shooting: 32, passing: 0, dribbling: 13, defending: 75, physical: 73, youth: 100 } },
+    ],
+    CAM: [
+      { name: "Cole Palmer", age: 23, stats: { pace: 65, shooting: 100, passing: 76, dribbling: 88, defending: 32, physical: 36, youth: 85 } },
+      { name: "Alejandro Garnacho", age: 21, stats: { pace: 97, shooting: 68, passing: 5, dribbling: 44, defending: 0, physical: 8, youth: 100 } },
+    ],
+    WING: [
+      { name: "Pedro Neto", age: 26, stats: { pace: 89, shooting: 48, passing: 40, dribbling: 47, defending: 38, physical: 44, youth: 58 } },
+      { name: "Estêvão", age: 18, stats: { pace: 85, shooting: 39, passing: 35, dribbling: 47, defending: 16, physical: 0, youth: 100 } },
+      { name: "Raheem Sterling", age: 31, stats: { pace: 56, shooting: 39, passing: 40, dribbling: 47, defending: 44, physical: 0, youth: 17 } },
+      { name: "Jamie Gittens", age: 21, stats: { pace: 93, shooting: 35, passing: 0, dribbling: 60, defending: 0, physical: 8, youth: 100 } },
+      { name: "Facundo Buonanotte", age: 21, stats: { pace: 30, shooting: 22, passing: 35, dribbling: 7, defending: 6, physical: 0, youth: 100 } },
+      { name: "Tyrique George", age: 20, stats: { pace: 44, shooting: 4, passing: 0, dribbling: 0, defending: 25, physical: 0, youth: 100 } },
+    ],
+    ST: [
+      { name: "João Pedro", age: 24, stats: { pace: 72, shooting: 35, passing: 70, dribbling: 100, defending: 32, physical: 14, youth: 85 } },
+      { name: "Liam Delap", age: 23, stats: { pace: 76, shooting: 45, passing: 10, dribbling: 55, defending: 12, physical: 67, youth: 92 } },
+      { name: "Marc Guiu", age: 20, stats: { pace: 66, shooting: 0, passing: 0, dribbling: 0, defending: 29, physical: 38, youth: 100 } },
+    ],
+  },
+  barcelona: {
+    CB: [
+      { name: "Ronald Araujo", age: 27, stats: { pace: 98, shooting: 55, passing: 43, dribbling: 11, defending: 47, physical: 71, youth: 64 } },
+      { name: "Pau Cubarsí", age: 19, stats: { pace: 75, shooting: 28, passing: 57, dribbling: 95, defending: 65, physical: 21, youth: 100 } },
+      { name: "Andreas Christensen", age: 29, stats: { pace: 61, shooting: 3, passing: 62, dribbling: 58, defending: 47, physical: 7, youth: 45 } },
+      { name: "Eric García", age: 25, stats: { pace: 59, shooting: 43, passing: 76, dribbling: 63, defending: 41, physical: 0, youth: 82 } },
+    ],
+    FB: [
+      { name: "Jules Koundé", age: 27, stats: { pace: 86, shooting: 19, passing: 40, dribbling: 93, defending: 89, physical: 100, youth: 58 } },
+      { name: "Balde", age: 22, stats: { pace: 100, shooting: 29, passing: 44, dribbling: 93, defending: 44, physical: 15, youth: 100 } },
+      { name: "Gerard Martín", age: 24, stats: { pace: 39, shooting: 35, passing: 24, dribbling: 27, defending: 11, physical: 20, youth: 83 } },
+    ],
+    DM: [
+      { name: "Marc Casadó", age: 22, stats: { pace: 0, shooting: 43, passing: 18, dribbling: 62, defending: 46, physical: 0, youth: 100 } },
+      { name: "Marc Bernal", age: 18, stats: { pace: 17, shooting: 0, passing: 9, dribbling: 15, defending: 0, physical: 0, youth: 100 } },
+    ],
+    CM: [
+      { name: "Pedri", age: 23, stats: { pace: 100, shooting: 53, passing: 100, dribbling: 100, defending: 100, physical: 45, youth: 100 } },
+      { name: "Frenkie de Jong", age: 28, stats: { pace: 100, shooting: 42, passing: 100, dribbling: 100, defending: 100, physical: 45, youth: 75 } },
+      { name: "Gavi", age: 21, stats: { pace: 100, shooting: 16, passing: 13, dribbling: 100, defending: 0, physical: 0, youth: 100 } },
+    ],
+    CAM: [
+      { name: "Dani Olmo", age: 27, stats: { pace: 59, shooting: 79, passing: 57, dribbling: 88, defending: 32, physical: 0, youth: 54 } },
+      { name: "Fermín", age: 22, stats: { pace: 62, shooting: 58, passing: 19, dribbling: 56, defending: 65, physical: 0, youth: 92 } },
+    ],
+    WING: [
+      { name: "Raphinha", age: 29, stats: { pace: 89, shooting: 83, passing: 95, dribbling: 80, defending: 78, physical: 72, youth: 33 } },
+      { name: "Lamine Yamal", age: 18, stats: { pace: 67, shooting: 70, passing: 100, dribbling: 100, defending: 0, physical: 0, youth: 100 } },
+      { name: "Ferran Torres", age: 26, stats: { pace: 59, shooting: 70, passing: 65, dribbling: 53, defending: 22, physical: 44, youth: 58 } },
+      { name: "Marcus Rashford", age: 28, stats: { pace: 74, shooting: 74, passing: 55, dribbling: 33, defending: 16, physical: 24, youth: 42 } },
+      { name: "Roony Bardghji", age: 20, stats: { pace: 22, shooting: 13, passing: 0, dribbling: 0, defending: 0, physical: 0, youth: 100 } },
+    ],
+    ST: [
+      { name: "Robert Lewandowski", age: 37, stats: { pace: 59, shooting: 90, passing: 100, dribbling: 100, defending: 53, physical: 81, youth: 0 } },
+    ],
+  },
+  realmadrid: {
+    CB: [
+      { name: "Antonio Rüdiger", age: 33, stats: { pace: 95, shooting: 60, passing: 86, dribbling: 58, defending: 65, physical: 93, youth: 9 } },
+      { name: "Éder Militão", age: 28, stats: { pace: 100, shooting: 48, passing: 71, dribbling: 63, defending: 71, physical: 64, youth: 55 } },
+      { name: "David Alaba", age: 33, stats: { pace: 70, shooting: 100, passing: 100, dribbling: 100, defending: 53, physical: 14, youth: 9 } },
+      { name: "Dean Huijsen", age: 20, stats: { pace: 77, shooting: 60, passing: 90, dribbling: 79, defending: 53, physical: 21, youth: 100 } },
+      { name: "Asencio", age: 23, stats: { pace: 84, shooting: 15, passing: 5, dribbling: 63, defending: 29, physical: 21, youth: 100 } },
+    ],
+    FB: [
+      { name: "Trent Alexander-Arnold", age: 27, stats: { pace: 57, shooting: 100, passing: 100, dribbling: 100, defending: 56, physical: 50, youth: 58 } },
+      { name: "Carvajal", age: 34, stats: { pace: 71, shooting: 55, passing: 60, dribbling: 100, defending: 61, physical: 75, youth: 0 } },
+      { name: "Ferland Mendy", age: 30, stats: { pace: 89, shooting: 74, passing: 40, dribbling: 67, defending: 44, physical: 100, youth: 33 } },
+      { name: "Álvaro Carreras", age: 23, stats: { pace: 89, shooting: 77, passing: 44, dribbling: 93, defending: 17, physical: 80, youth: 92 } },
+      { name: "Fran García", age: 26, stats: { pace: 100, shooting: 29, passing: 24, dribbling: 87, defending: 11, physical: 35, youth: 67 } },
+    ],
+    DM: [
+      { name: "Aurélien Tchouaméni", age: 26, stats: { pace: 72, shooting: 67, passing: 82, dribbling: 46, defending: 77, physical: 100, youth: 71 } },
+    ],
+    CM: [
+      { name: "Federico Valverde", age: 27, stats: { pace: 100, shooting: 100, passing: 88, dribbling: 88, defending: 100, physical: 100, youth: 100 } },
+      { name: "Eduardo Camavinga", age: 23, stats: { pace: 100, shooting: 26, passing: 50, dribbling: 88, defending: 100, physical: 73, youth: 100 } },
+      { name: "Dani Ceballos", age: 29, stats: { pace: 47, shooting: 42, passing: 38, dribbling: 63, defending: 0, physical: 0, youth: 50 } },
+    ],
+    CAM: [
+      { name: "Jude Bellingham", age: 22, stats: { pace: 79, shooting: 100, passing: 57, dribbling: 100, defending: 100, physical: 100, youth: 92 } },
+      { name: "Franco Mastantuono", age: 18, stats: { pace: 62, shooting: 37, passing: 19, dribbling: 44, defending: 32, physical: 28, youth: 100 } },
+    ],
+    WING: [
+      { name: "Vini Jr.", age: 25, stats: { pace: 100, shooting: 83, passing: 75, dribbling: 100, defending: 3, physical: 48, youth: 67 } },
+      { name: "Rodrygo", age: 25, stats: { pace: 78, shooting: 65, passing: 65, dribbling: 80, defending: 9, physical: 28, youth: 67 } },
+      { name: "Brahim", age: 26, stats: { pace: 56, shooting: 39, passing: 65, dribbling: 67, defending: 9, physical: 4, youth: 58 } },
+      { name: "Arda Güler", age: 21, stats: { pace: 11, shooting: 52, passing: 85, dribbling: 53, defending: 75, physical: 0, youth: 100 } },
+    ],
+    ST: [
+      { name: "Kylian Mbappé", age: 27, stats: { pace: 100, shooting: 95, passing: 100, dribbling: 100, defending: 32, physical: 43, youth: 62 } },
+      { name: "Endrick", age: 19, stats: { pace: 100, shooting: 30, passing: 20, dribbling: 73, defending: 12, physical: 5, youth: 100 } },
+      { name: "Gonzalo", age: 22, stats: { pace: 38, shooting: 0, passing: 15, dribbling: 0, defending: 56, physical: 10, youth: 100 } },
+    ],
+  },
+  bayern: {
+    CB: [
+      { name: "Jonathan Tah", age: 30, stats: { pace: 59, shooting: 18, passing: 29, dribbling: 21, defending: 82, physical: 93, youth: 36 } },
+      { name: "Dayot Upamecano", age: 27, stats: { pace: 91, shooting: 35, passing: 48, dribbling: 74, defending: 65, physical: 79, youth: 64 } },
+      { name: "Kim Min Jae", age: 29, stats: { pace: 82, shooting: 5, passing: 19, dribbling: 21, defending: 59, physical: 79, youth: 45 } },
+      { name: "Hiroki Ito", age: 26, stats: { pace: 84, shooting: 65, passing: 81, dribbling: 68, defending: 41, physical: 0, youth: 73 } },
+      { name: "Josip Stanišić", age: 26, stats: { pace: 82, shooting: 33, passing: 52, dribbling: 53, defending: 35, physical: 7, youth: 73 } },
+    ],
+    FB: [
+      { name: "Alphonso Davies", age: 25, stats: { pace: 100, shooting: 81, passing: 56, dribbling: 100, defending: 22, physical: 60, youth: 75 } },
+      { name: "Konrad Laimer", age: 28, stats: { pace: 79, shooting: 90, passing: 48, dribbling: 67, defending: 61, physical: 60, youth: 50 } },
+      { name: "Raphaël Guerreiro", age: 32, stats: { pace: 32, shooting: 100, passing: 84, dribbling: 100, defending: 22, physical: 0, youth: 17 } },
+      { name: "Sacha Boey", age: 25, stats: { pace: 39, shooting: 45, passing: 8, dribbling: 67, defending: 33, physical: 65, youth: 75 } },
+    ],
+    DM: [
+      { name: "Joshua Kimmich", age: 31, stats: { pace: 78, shooting: 90, passing: 100, dribbling: 92, defending: 92, physical: 77, youth: 36 } },
+      { name: "Aleksandar Pavlović", age: 21, stats: { pace: 22, shooting: 43, passing: 82, dribbling: 46, defending: 38, physical: 15, youth: 100 } },
+      { name: "David Santos Daiber", age: 19, stats: { pace: 17, shooting: 0, passing: 0, dribbling: 0, defending: 0, physical: 0, youth: 100 } },
+    ],
+    CM: [
+      { name: "Leon Goretzka", age: 31, stats: { pace: 100, shooting: 79, passing: 38, dribbling: 38, defending: 100, physical: 91, youth: 0 } },
+      { name: "Tom Bischof", age: 20, stats: { pace: 27, shooting: 21, passing: 25, dribbling: 25, defending: 0, physical: 0, youth: 100 } },
+    ],
+    CAM: [
+      { name: "Jamal Musiala", age: 23, stats: { pace: 79, shooting: 95, passing: 43, dribbling: 100, defending: 76, physical: 36, youth: 85 } },
+      { name: "Lennart Karl", age: 18, stats: { pace: 47, shooting: 0, passing: 0, dribbling: 0, defending: 0, physical: 0, youth: 100 } },
+    ],
+    WING: [
+      { name: "Michael Olise", age: 24, stats: { pace: 41, shooting: 65, passing: 90, dribbling: 80, defending: 69, physical: 36, youth: 75 } },
+      { name: "Luis Díaz", age: 29, stats: { pace: 78, shooting: 70, passing: 50, dribbling: 80, defending: 53, physical: 72, youth: 33 } },
+      { name: "Serge Gnabry", age: 30, stats: { pace: 44, shooting: 78, passing: 60, dribbling: 60, defending: 47, physical: 36, youth: 25 } },
+    ],
+    ST: [
+      { name: "Harry Kane", age: 32, stats: { pace: 24, shooting: 100, passing: 100, dribbling: 100, defending: 65, physical: 71, youth: 23 } },
+      { name: "Nicolas Jackson", age: 24, stats: { pace: 86, shooting: 30, passing: 55, dribbling: 82, defending: 41, physical: 48, youth: 85 } },
+    ],
+  },
+  psg: {
+    CB: [
+      { name: "Marquinhos", age: 31, stats: { pace: 93, shooting: 63, passing: 100, dribbling: 79, defending: 94, physical: 50, youth: 27 } },
+      { name: "Willian Pacho", age: 24, stats: { pace: 98, shooting: 8, passing: 38, dribbling: 16, defending: 76, physical: 93, youth: 91 } },
+      { name: "Lucas Hernández", age: 30, stats: { pace: 77, shooting: 57, passing: 86, dribbling: 58, defending: 53, physical: 29, youth: 36 } },
+      { name: "Illia Zabarnyi", age: 23, stats: { pace: 98, shooting: 15, passing: 48, dribbling: 26, defending: 41, physical: 36, youth: 100 } },
+      { name: "Lucas Beraldo", age: 22, stats: { pace: 66, shooting: 18, passing: 57, dribbling: 47, defending: 35, physical: 14, youth: 100 } },
+      { name: "Noham Kamara", age: 19, stats: { pace: 59, shooting: 33, passing: 10, dribbling: 0, defending: 0, physical: 0, youth: 100 } },
+    ],
+    FB: [
+      { name: "Achraf Hakimi", age: 27, stats: { pace: 100, shooting: 100, passing: 72, dribbling: 100, defending: 67, physical: 75, youth: 58 } },
+      { name: "Nuno Mendes", age: 23, stats: { pace: 100, shooting: 77, passing: 48, dribbling: 100, defending: 56, physical: 65, youth: 92 } },
+    ],
+    CM: [
+      { name: "Vitinha", age: 26, stats: { pace: 100, shooting: 89, passing: 100, dribbling: 100, defending: 25, physical: 0, youth: 100 } },
+      { name: "João Neves", age: 21, stats: { pace: 100, shooting: 32, passing: 38, dribbling: 88, defending: 100, physical: 100, youth: 100 } },
+      { name: "Fabián Ruiz", age: 29, stats: { pace: 47, shooting: 74, passing: 38, dribbling: 50, defending: 25, physical: 0, youth: 50 } },
+      { name: "Warren Zaïre-Emery", age: 20, stats: { pace: 100, shooting: 26, passing: 0, dribbling: 25, defending: 25, physical: 64, youth: 100 } },
+      { name: "Senny Mayulu", age: 19, stats: { pace: 100, shooting: 26, passing: 0, dribbling: 13, defending: 0, physical: 0, youth: 100 } },
+    ],
+    WING: [
+      { name: "Khvicha Kvaratskhelia", age: 25, stats: { pace: 70, shooting: 65, passing: 85, dribbling: 87, defending: 94, physical: 84, youth: 67 } },
+      { name: "Désiré Doué", age: 20, stats: { pace: 59, shooting: 65, passing: 55, dribbling: 100, defending: 84, physical: 68, youth: 100 } },
+      { name: "Bradley Barcola", age: 23, stats: { pace: 85, shooting: 52, passing: 60, dribbling: 60, defending: 34, physical: 36, youth: 83 } },
+      { name: "Lee Kang In", age: 25, stats: { pace: 19, shooting: 43, passing: 70, dribbling: 47, defending: 69, physical: 28, youth: 67 } },
+      { name: "Ibrahim Mbaye", age: 18, stats: { pace: 37, shooting: 0, passing: 0, dribbling: 0, defending: 0, physical: 0, youth: 100 } },
+    ],
+    ST: [
+      { name: "Ousmane Dembélé", age: 28, stats: { pace: 100, shooting: 85, passing: 100, dribbling: 100, defending: 71, physical: 10, youth: 54 } },
+      { name: "Gonçalo Ramos", age: 24, stats: { pace: 55, shooting: 40, passing: 30, dribbling: 64, defending: 65, physical: 57, youth: 85 } },
+    ],
+  },
+  juventus: {
+    CB: [
+      { name: "Bremer", age: 29, stats: { pace: 100, shooting: 48, passing: 19, dribbling: 37, defending: 76, physical: 50, youth: 45 } },
+      { name: "Pierre Kalulu", age: 25, stats: { pace: 98, shooting: 55, passing: 67, dribbling: 58, defending: 47, physical: 21, youth: 82 } },
+      { name: "Federico Gatti", age: 27, stats: { pace: 89, shooting: 28, passing: 0, dribbling: 32, defending: 47, physical: 50, youth: 64 } },
+      { name: "Daniele Rugani", age: 31, stats: { pace: 0, shooting: 23, passing: 0, dribbling: 5, defending: 29, physical: 0, youth: 27 } },
+      { name: "Lloyd Kelly", age: 27, stats: { pace: 68, shooting: 23, passing: 52, dribbling: 42, defending: 0, physical: 43, youth: 64 } },
+    ],
+    FB: [
+      { name: "Andrea Cambiaso", age: 26, stats: { pace: 64, shooting: 94, passing: 52, dribbling: 93, defending: 28, physical: 30, youth: 67 } },
+      { name: "João Mário", age: 26, stats: { pace: 86, shooting: 71, passing: 28, dribbling: 80, defending: 0, physical: 15, youth: 67 } },
+      { name: "Juan David Cabal", age: 25, stats: { pace: 43, shooting: 0, passing: 20, dribbling: 0, defending: 22, physical: 25, youth: 75 } },
+      { name: "Jonas Rouhi", age: 22, stats: { pace: 14, shooting: 6, passing: 0, dribbling: 0, defending: 0, physical: 0, youth: 100 } },
+    ],
+    DM: [
+      { name: "Manuel Locatelli", age: 28, stats: { pace: 28, shooting: 67, passing: 91, dribbling: 31, defending: 77, physical: 69, youth: 57 } },
+    ],
+    CM: [
+      { name: "Khéphren Thuram", age: 25, stats: { pace: 100, shooting: 68, passing: 0, dribbling: 38, defending: 100, physical: 82, youth: 100 } },
+      { name: "Weston McKennie", age: 27, stats: { pace: 100, shooting: 42, passing: 0, dribbling: 0, defending: 100, physical: 73, youth: 100 } },
+      { name: "Fabio Miretti", age: 22, stats: { pace: 100, shooting: 0, passing: 0, dribbling: 0, defending: 0, physical: 0, youth: 100 } },
+    ],
+    CAM: [
+      { name: "Teun Koopmeiners", age: 28, stats: { pace: 50, shooting: 79, passing: 57, dribbling: 31, defending: 100, physical: 76, youth: 46 } },
+      { name: "Kenan Yıldız", age: 20, stats: { pace: 91, shooting: 74, passing: 14, dribbling: 63, defending: 0, physical: 40, youth: 100 } },
+      { name: "Vasilije Adžić", age: 19, stats: { pace: 41, shooting: 0, passing: 0, dribbling: 0, defending: 0, physical: 0, youth: 100 } },
+    ],
+    WING: [
+      { name: "Filip Kostić", age: 33, stats: { pace: 56, shooting: 48, passing: 75, dribbling: 33, defending: 100, physical: 80, youth: 0 } },
+      { name: "Edon Zhegrova", age: 27, stats: { pace: 63, shooting: 26, passing: 50, dribbling: 67, defending: 0, physical: 20, youth: 50 } },
+      { name: "Francisco Conceição", age: 23, stats: { pace: 74, shooting: 13, passing: 35, dribbling: 67, defending: 25, physical: 0, youth: 83 } },
+    ],
+    ST: [
+      { name: "Loïs Openda", age: 26, stats: { pace: 100, shooting: 50, passing: 55, dribbling: 100, defending: 15, physical: 62, youth: 69 } },
+      { name: "Jonathan David", age: 26, stats: { pace: 83, shooting: 55, passing: 65, dribbling: 91, defending: 24, physical: 52, youth: 69 } },
+      { name: "Dušan Vlahović", age: 26, stats: { pace: 72, shooting: 65, passing: 55, dribbling: 64, defending: 9, physical: 71, youth: 69 } },
+      { name: "Arkadiusz Milik", age: 32, stats: { pace: 0, shooting: 55, passing: 70, dribbling: 64, defending: 41, physical: 0, youth: 23 } },
+    ],
+  },
+  dortmund: {
+    CB: [
+      { name: "Nico Schlotterbeck", age: 26, stats: { pace: 84, shooting: 73, passing: 100, dribbling: 74, defending: 71, physical: 64, youth: 73 } },
+      { name: "Emre Can", age: 32, stats: { pace: 91, shooting: 100, passing: 86, dribbling: 79, defending: 53, physical: 79, youth: 18 } },
+      { name: "Waldemar Anton", age: 29, stats: { pace: 73, shooting: 40, passing: 62, dribbling: 37, defending: 65, physical: 79, youth: 45 } },
+      { name: "Niklas Süle", age: 30, stats: { pace: 55, shooting: 50, passing: 67, dribbling: 42, defending: 47, physical: 43, youth: 36 } },
+      { name: "Aaron Anselmino", age: 20, stats: { pace: 68, shooting: 35, passing: 38, dribbling: 21, defending: 0, physical: 0, youth: 100 } },
+      { name: "Filippo Mane", age: 21, stats: { pace: 70, shooting: 0, passing: 0, dribbling: 0, defending: 0, physical: 0, youth: 100 } },
+    ],
+    FB: [
+      { name: "Ramy Bensebaini", age: 30, stats: { pace: 46, shooting: 94, passing: 24, dribbling: 80, defending: 44, physical: 75, youth: 33 } },
+      { name: "Julian Ryerson", age: 28, stats: { pace: 50, shooting: 71, passing: 28, dribbling: 73, defending: 39, physical: 90, youth: 50 } },
+      { name: "Daniel Svensson", age: 24, stats: { pace: 61, shooting: 48, passing: 44, dribbling: 73, defending: 17, physical: 50, youth: 83 } },
+      { name: "Yan Couto", age: 23, stats: { pace: 64, shooting: 65, passing: 52, dribbling: 100, defending: 0, physical: 0, youth: 92 } },
+      { name: "Almugera Kabar", age: 19, stats: { pace: 61, shooting: 0, passing: 0, dribbling: 0, defending: 0, physical: 30, youth: 100 } },
+    ],
+    DM: [
+      { name: "Felix Nmecha", age: 25, stats: { pace: 100, shooting: 90, passing: 27, dribbling: 69, defending: 69, physical: 100, youth: 79 } },
+      { name: "Marcel Sabitzer", age: 32, stats: { pace: 89, shooting: 100, passing: 91, dribbling: 62, defending: 38, physical: 54, youth: 29 } },
+      { name: "Pascal Groß", age: 34, stats: { pace: 0, shooting: 95, passing: 100, dribbling: 54, defending: 8, physical: 54, youth: 14 } },
+      { name: "Salih Özcan", age: 28, stats: { pace: 67, shooting: 19, passing: 0, dribbling: 8, defending: 31, physical: 77, youth: 57 } },
+    ],
+    CM: [
+      { name: "Jobe Bellingham", age: 20, stats: { pace: 100, shooting: 26, passing: 0, dribbling: 0, defending: 0, physical: 55, youth: 100 } },
+    ],
+    CAM: [
+      { name: "Julian Brandt", age: 29, stats: { pace: 62, shooting: 74, passing: 57, dribbling: 69, defending: 16, physical: 56, youth: 38 } },
+      { name: "Carney Chukwuemeka", age: 22, stats: { pace: 62, shooting: 11, passing: 14, dribbling: 38, defending: 51, physical: 40, youth: 92 } },
+    ],
+    WING: [
+      { name: "Karim Adeyemi", age: 24, stats: { pace: 100, shooting: 48, passing: 30, dribbling: 47, defending: 25, physical: 48, youth: 75 } },
+      { name: "Julien Duranville", age: 19, stats: { pace: 78, shooting: 0, passing: 0, dribbling: 47, defending: 0, physical: 0, youth: 100 } },
+      { name: "Cole Campbell", age: 20, stats: { pace: 81, shooting: 0, passing: 0, dribbling: 0, defending: 0, physical: 0, youth: 100 } },
+    ],
+    ST: [
+      { name: "Serhou Guirassy", age: 30, stats: { pace: 52, shooting: 85, passing: 90, dribbling: 100, defending: 56, physical: 76, youth: 38 } },
+      { name: "Maximilian Beier", age: 23, stats: { pace: 100, shooting: 40, passing: 50, dribbling: 91, defending: 50, physical: 0, youth: 92 } },
+      { name: "Fábio Silva", age: 23, stats: { pace: 83, shooting: 30, passing: 30, dribbling: 82, defending: 18, physical: 57, youth: 92 } },
+    ],
+  },
+  intermilan: {
+    CB: [
+      { name: "Fikayo Tomori", age: 28, stats: { pace: 100, shooting: 23, passing: 29, dribbling: 42, defending: 53, physical: 36, youth: 55 } },
+      { name: "Matteo Gabbia", age: 26, stats: { pace: 27, shooting: 10, passing: 0, dribbling: 5, defending: 47, physical: 21, youth: 73 } },
+      { name: "Strahinja Pavlović", age: 24, stats: { pace: 75, shooting: 30, passing: 0, dribbling: 26, defending: 12, physical: 71, youth: 91 } },
+      { name: "Koni De Winter", age: 23, stats: { pace: 68, shooting: 23, passing: 19, dribbling: 37, defending: 12, physical: 0, youth: 100 } },
+      { name: "David Odogu", age: 19, stats: { pace: 68, shooting: 3, passing: 0, dribbling: 0, defending: 0, physical: 0, youth: 100 } },
+    ],
+    FB: [
+      { name: "Pervis Estupiñán", age: 28, stats: { pace: 57, shooting: 52, passing: 52, dribbling: 87, defending: 28, physical: 40, youth: 50 } },
+      { name: "Zachary Athekame", age: 21, stats: { pace: 79, shooting: 0, passing: 0, dribbling: 0, defending: 0, physical: 20, youth: 100 } },
+      { name: "Davide Bartesaghi", age: 20, stats: { pace: 0, shooting: 6, passing: 0, dribbling: 0, defending: 0, physical: 5, youth: 100 } },
+    ],
+    DM: [
+      { name: "Youssouf Fofana", age: 27, stats: { pace: 56, shooting: 62, passing: 45, dribbling: 46, defending: 62, physical: 62, youth: 64 } },
+      { name: "Yacine Adli", age: 25, stats: { pace: 67, shooting: 67, passing: 91, dribbling: 46, defending: 15, physical: 0, youth: 79 } },
+      { name: "Samuele Ricci", age: 24, stats: { pace: 83, shooting: 24, passing: 45, dribbling: 54, defending: 15, physical: 23, youth: 86 } },
+      { name: "Ardon Jashari", age: 23, stats: { pace: 94, shooting: 57, passing: 45, dribbling: 8, defending: 8, physical: 100, youth: 93 } },
+    ],
+    CM: [
+      { name: "Luka Modrić", age: 40, stats: { pace: 93, shooting: 58, passing: 100, dribbling: 100, defending: 0, physical: 0, youth: 0 } },
+      { name: "Ruben Loftus-Cheek", age: 30, stats: { pace: 100, shooting: 68, passing: 25, dribbling: 38, defending: 50, physical: 73, youth: 25 } },
+    ],
+    CAM: [
+      { name: "Adrien Rabiot", age: 30, stats: { pace: 82, shooting: 79, passing: 48, dribbling: 44, defending: 100, physical: 100, youth: 31 } },
+      { name: "Christopher Nkunku", age: 28, stats: { pace: 71, shooting: 79, passing: 43, dribbling: 56, defending: 5, physical: 12, youth: 46 } },
+    ],
+    WING: [
+      { name: "Christian Pulisic", age: 27, stats: { pace: 78, shooting: 74, passing: 70, dribbling: 73, defending: 56, physical: 32, youth: 50 } },
+      { name: "Rafael Leão", age: 26, stats: { pace: 96, shooting: 57, passing: 70, dribbling: 73, defending: 0, physical: 72, youth: 58 } },
+      { name: "Alexis Saelemaekers", age: 26, stats: { pace: 48, shooting: 9, passing: 45, dribbling: 40, defending: 100, physical: 24, youth: 58 } },
+    ],
+    ST: [
+      { name: "Santiago Giménez", age: 24, stats: { pace: 72, shooting: 45, passing: 60, dribbling: 64, defending: 59, physical: 10, youth: 85 } },
+    ],
+  },
+};
