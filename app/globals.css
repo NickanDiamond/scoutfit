@@ -26,3 +26,39 @@
   background-position: center, center;
   background-size: 100px 100px, 100% 2px;
 }
+
+
+/* ---------- Dark Stadium theme ---------- */
+
+/* Page backdrop: deep navy instead of flat slate, with a soft cyan
+   floodlight glow washing down from the top, like stadium lights over
+   a night match. Fixed so it doesn't repeat/scroll oddly on a tall page. */
+.stadium-bg {
+  background-color: #060a14;
+  background-image:
+    radial-gradient(ellipse 900px 500px at 20% -10%, rgba(34, 211, 238, 0.16), transparent 60%),
+    radial-gradient(ellipse 700px 500px at 100% 0%, rgba(34, 211, 238, 0.08), transparent 55%),
+    linear-gradient(180deg, #060a14 0%, #0a0f1e 40%, #0a0f1e 100%);
+  background-attachment: fixed;
+}
+
+/* Frosted glass card -- replaces flat slate-900 panels for a more
+   premium, layered feel against the stadium backdrop. */
+.glass-card {
+  background: rgba(255, 255, 255, 0.035);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* A soft blurred glow blob, dropped behind hero elements (logo mark,
+   headline numbers) for a floodlight/spotlight accent. Position with a
+   wrapping relative parent. */
+.floodlight {
+  position: absolute;
+  inset: -40px;
+  background: radial-gradient(circle, rgba(34, 211, 238, 0.35), transparent 70%);
+  filter: blur(20px);
+  pointer-events: none;
+  z-index: -1;
+}

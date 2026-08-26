@@ -140,6 +140,32 @@ stat gets the largest share, the bottom stat the smallest — via
 `rankToWeights` in `lib/scoring.ts`. Arrow buttons are included next to
 each row as a non-drag fallback (keyboard/touch friendly).
 
+## Dark Stadium visual theme
+
+A full redesign from the original flat dark-slate + green look:
+
+- **New accent color**: electric cyan ("volt" in `tailwind.config.js`)
+  replaces green for every interactive element (buttons, active states,
+  fit-score bars, focus rings) — chosen specifically so it reads as
+  distinct "brand chrome" against the still-green pitch/turf graphics,
+  instead of blending into them.
+- **Stadium backdrop**: a deep navy page background with a soft cyan
+  floodlight glow washing down from the top (`stadium-bg` in
+  `globals.css`), instead of flat slate.
+- **Glass cards**: key panels use a frosted, blurred translucent surface
+  (`glass-card`) instead of a flat dark fill, for more visual depth.
+- **Floodlight glow**: a soft blurred glow sits behind the header logo
+  mark, and primary buttons / score bars carry a subtle cyan glow
+  (`shadow-glow` / `shadow-glow-sm`) rather than a flat fill.
+- **Jerseys**: gradient-shaded instead of flat red, with a cyan outline
+  and number, tying the squad/formation graphics into the new palette.
+- Club/position selection cards now lift and glow on hover instead of
+  just changing border color.
+
+The actual pitch/turf textures (`pitch-stripes`, `pitch-markings`) are
+unchanged — that's real grass green representing an actual football
+pitch, not brand color, so it was deliberately left alone.
+
 ## Why club choice now actually matters
 
 Two real bugs made club choice barely affect recommendations, both fixed:

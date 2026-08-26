@@ -42,7 +42,7 @@ import {
 import { isSupabaseConfigured } from "@/lib/supabaseClient";
 import { getClubs, getClubWeights, getPlayersForPosition, getSquadForClub, getFullSquad, getAllClubWeights, ClubRow } from "@/lib/db";
 
-const COLORS = ["#4f7cff", "#22c55e", "#f2cd6b", "#fb923c"];
+const COLORS = ["#22d3ee", "#a78bfa", "#f2cd6b", "#fb923c"];
 const MAX_COMPARE = 4;
 const RANK_STYLES = [
   "bg-yellow-500/20 text-yellow-300 border-yellow-500/40",
@@ -60,16 +60,24 @@ const STEP_LABEL: Record<Step, string> = {
 };
 
 function Jersey({ number, size = 44 }: { number: number | string; size?: number }) {
+  const gid = `jgrad-${number}`;
   return (
-    <svg viewBox="0 0 64 64" width={size} height={size} className="drop-shadow-md shrink-0">
+    <svg viewBox="0 0 64 64" width={size} height={size} className="drop-shadow-lg shrink-0">
+      <defs>
+        <linearGradient id={gid} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#334155" />
+          <stop offset="100%" stopColor="#0f172a" />
+        </linearGradient>
+      </defs>
       <path
         d="M22 3 L10 13 L15 24 L21 20 L21 59 L43 59 L43 20 L49 24 L54 13 L42 3 L34 8 L30 8 Z"
-        fill="#e11d3c"
-        stroke="#7f0f24"
+        fill={`url(#${gid})`}
+        stroke="#22d3ee"
+        strokeOpacity="0.6"
         strokeWidth="1.5"
         strokeLinejoin="round"
       />
-      <text x="32" y="41" textAnchor="middle" fontSize="19" fontWeight="800" fill="white">
+      <text x="32" y="41" textAnchor="middle" fontSize="19" fontWeight="800" fill="#67e8f9">
         {number}
       </text>
     </svg>
@@ -354,13 +362,16 @@ export default function Home() {
   const stepIndex = STEP_ORDER.indexOf(step);
 
   return (
-    <main className="min-h-screen bg-slate-950 text-slate-100">
-      <header className="sticky top-0 z-10 border-b border-slate-800/80 bg-slate-950/90 backdrop-blur">
+    <main className="min-h-screen stadium-bg text-slate-100">
+      <header className="sticky top-0 z-10 border-b border-white/10 bg-[#060a14]/85 backdrop-blur-md">
         <div className="h-1 pitch-stripes" />
         <div className="max-w-3xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-pitch-500 to-blue-600 flex items-center justify-center font-bold text-sm">
-              SF
+            <div className="relative">
+              <div className="floodlight opacity-70" />
+              <div className="relative w-9 h-9 rounded-xl bg-gradient-to-br from-volt-400 to-volt-600 shadow-glow-sm flex items-center justify-center font-bold text-sm text-slate-950">
+                SF
+              </div>
             </div>
             <div>
               <h1 className="text-lg font-bold leading-none">ScoutFit</h1>
@@ -370,7 +381,7 @@ export default function Home() {
           <div
             className={`flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border ${
               isSupabaseConfigured
-                ? "border-pitch-600/40 text-pitch-400 bg-pitch-500/10"
+                ? "border-volt-600/40 text-volt-400 bg-volt-500/10"
                 : "border-amber-700/40 text-amber-300 bg-amber-500/10"
             }`}
           >
@@ -387,15 +398,15 @@ export default function Home() {
             <div key={s} className="flex items-center gap-2 flex-1">
               <div
                 className={`flex items-center gap-2 text-xs font-medium ${
-                  i <= stepIndex ? "text-pitch-400" : "text-slate-600"
+                  i <= stepIndex ? "text-volt-400" : "text-slate-600"
                 }`}
               >
                 <span
                   className={`w-5 h-5 rounded-full flex items-center justify-center border text-[11px] ${
                     i < stepIndex
-                      ? "bg-pitch-500 border-pitch-500 text-slate-950"
+                      ? "bg-volt-500 border-volt-500 text-slate-950"
                       : i === stepIndex
-                      ? "border-pitch-500"
+                      ? "border-volt-500"
                       : "border-slate-700"
                   }`}
                 >
@@ -434,7 +445,7 @@ export default function Home() {
                 <button
                   key={c.id}
                   onClick={() => chooseClub(c.id)}
-                  className="bg-slate-900/60 border border-slate-800 rounded-xl p-4 text-left hover:border-pitch-500 hover:bg-slate-900 transition-colors"
+                  className="glass-card rounded-xl p-4 text-left hover:border-volt-500 hover:shadow-glow-sm hover:-translate-y-0.5 transition-all duration-150"
                 >
                   <span className="font-semibold text-slate-100">{c.name}</span>
                 </button>
@@ -454,7 +465,7 @@ export default function Home() {
                 <button
                   key={key}
                   onClick={() => choosePosition(key as PositionKey)}
-                  className="bg-slate-900/60 border border-slate-800 rounded-xl p-5 text-left hover:border-pitch-500 hover:bg-slate-900 transition-colors"
+                  className="glass-card rounded-xl p-5 text-left hover:border-volt-500 hover:shadow-glow-sm hover:-translate-y-0.5 transition-all duration-150"
                 >
                   <span className="font-semibold text-slate-100">{label}</span>
                 </button>
@@ -480,13 +491,13 @@ export default function Home() {
                   onDragOver={(e) => handleDragOver(e, i)}
                   onDragEnd={handleDragEnd}
                   className={`w-full flex items-center gap-3 border rounded-xl p-3.5 text-left bg-slate-900/60 transition-colors cursor-grab active:cursor-grabbing ${
-                    dragIndex === i ? "border-pitch-500 bg-pitch-500/10" : "border-slate-800"
+                    dragIndex === i ? "border-volt-500 bg-volt-500/10" : "border-slate-800"
                   }`}
                 >
                   <span className="text-slate-600 shrink-0">
                     <GripVertical size={16} />
                   </span>
-                  <span className="w-6 h-6 rounded-full flex items-center justify-center border border-pitch-600/40 text-pitch-400 bg-pitch-500/10 text-[11px] font-semibold shrink-0">
+                  <span className="w-6 h-6 rounded-full flex items-center justify-center border border-volt-600/40 text-volt-400 bg-volt-500/10 text-[11px] font-semibold shrink-0">
                     {i + 1}
                   </span>
                   <span className="flex-1">
@@ -524,13 +535,13 @@ export default function Home() {
               onClick={() => setValueMode((v) => !v)}
               className={`w-full flex items-center gap-3 border rounded-xl p-3.5 text-left transition-colors mb-6 ${
                 valueMode
-                  ? "border-pitch-500 bg-pitch-500/10"
+                  ? "border-volt-500 bg-volt-500/10"
                   : "border-slate-800 bg-slate-900/60 hover:border-slate-700"
               }`}
             >
               <span
                 className={`w-5 h-5 rounded border flex items-center justify-center shrink-0 ${
-                  valueMode ? "bg-pitch-500 border-pitch-500 text-slate-950" : "border-slate-700"
+                  valueMode ? "bg-volt-500 border-volt-500 text-slate-950" : "border-slate-700"
                 }`}
               >
                 {valueMode && <Check size={12} />}
@@ -546,7 +557,7 @@ export default function Home() {
 
             <button
               onClick={showResults}
-              className="w-full bg-pitch-500 disabled:bg-slate-800 disabled:text-slate-600 text-slate-950 font-semibold rounded-xl py-3 hover:bg-pitch-400 transition-colors"
+              className="w-full bg-volt-500 disabled:bg-slate-800 disabled:text-slate-600 disabled:shadow-none text-slate-950 font-semibold rounded-xl py-3 hover:bg-volt-400 shadow-glow-sm transition-all"
             >
               Show recommendations
             </button>
@@ -562,7 +573,7 @@ export default function Home() {
               </h2>
               <button
                 onClick={startOver}
-                className="text-xs border border-slate-800 rounded-lg px-2.5 py-1.5 text-slate-400 hover:text-white hover:border-pitch-500 transition-colors"
+                className="text-xs border border-slate-800 rounded-lg px-2.5 py-1.5 text-slate-400 hover:text-white hover:border-volt-500 transition-colors"
               >
                 Start over
               </button>
@@ -646,7 +657,7 @@ export default function Home() {
                           onClick={() => toggleSquadCompare(m.name)}
                           className={`mt-1 text-[10px] px-2 py-0.5 rounded-full border transition-colors ${
                             selectedSquad.includes(m.name)
-                              ? "bg-pitch-500 border-pitch-500 text-slate-950 font-semibold"
+                              ? "bg-volt-500 border-volt-500 text-slate-950 font-semibold"
                               : "border-white/30 text-white/80 hover:border-white"
                           }`}
                         >
@@ -665,11 +676,11 @@ export default function Home() {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Filter by player name…"
-                className="w-full bg-slate-900 border border-slate-800 rounded-lg pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-pitch-500 placeholder:text-slate-600"
+                className="w-full bg-slate-900 border border-slate-800 rounded-lg pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-volt-500 placeholder:text-slate-600"
               />
             </div>
 
-            <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-4">
+            <div className="glass-card rounded-xl p-4">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2 text-slate-400">
                   <Users size={14} />
@@ -716,7 +727,7 @@ export default function Home() {
                         <td className="font-medium text-slate-200">
                           {p.name}
                           {bestSquadScore !== null && p.score > bestSquadScore && (
-                            <span className="ml-2 inline-flex items-center gap-0.5 text-[10px] font-semibold text-pitch-400 bg-pitch-500/10 border border-pitch-600/40 rounded-full px-1.5 py-0.5 align-middle">
+                            <span className="ml-2 inline-flex items-center gap-0.5 text-[10px] font-semibold text-volt-400 bg-volt-500/10 border border-volt-600/40 rounded-full px-1.5 py-0.5 align-middle">
                               <TrendingUp size={9} />+{(p.score - bestSquadScore).toFixed(0)}
                             </span>
                           )}
@@ -734,7 +745,7 @@ export default function Home() {
                           <div className="flex items-center gap-2">
                             <div className="w-24 h-1.5 bg-slate-800 rounded-full overflow-hidden">
                               <div
-                                className="h-full bg-gradient-to-r from-blue-500 to-pitch-500 rounded-full"
+                                className="h-full bg-gradient-to-r from-volt-600 to-volt-400 rounded-full shadow-glow-sm"
                                 style={{ width: `${p.score}%` }}
                               />
                             </div>
@@ -751,8 +762,8 @@ export default function Home() {
                             onClick={() => toggleCompare(p.name)}
                             className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${
                               selected.includes(p.name)
-                                ? "bg-pitch-500 border-pitch-500 text-slate-950"
-                                : "border-slate-700 hover:border-pitch-500"
+                                ? "bg-volt-500 border-volt-500 text-slate-950"
+                                : "border-slate-700 hover:border-volt-500"
                             }`}
                           >
                             {selected.includes(p.name) && <span className="text-[10px] font-bold">✓</span>}
@@ -766,7 +777,7 @@ export default function Home() {
             </div>
 
             {compareEntries.length >= 2 && (
-              <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-4 mt-5">
+              <div className="glass-card rounded-xl p-4 mt-5">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2 text-slate-400">
                     <ArrowLeftRight size={14} />
