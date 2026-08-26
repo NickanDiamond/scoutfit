@@ -105,7 +105,7 @@ const XI_NUMBERS = [
 function PitchXI({ rows }: { rows: XISlot[][] }) {
   const rowYs = [10, 34, 58, 84];
   return (
-    <div className="relative pitch-stripes pitch-markings rounded-xl overflow-hidden" style={{ aspectRatio: "3 / 4" }}>
+    <div className="relative pitch-stripes pitch-markings rounded-md overflow-hidden" style={{ aspectRatio: "3 / 4" }}>
       {rows.map((slots, ri) =>
         slots.map((slot, si) => {
           const count = slots.length;
@@ -366,16 +366,13 @@ export default function Home() {
       <header className="sticky top-0 z-10 border-b border-white/10 bg-[#060a14]/85 backdrop-blur-md">
         <div className="h-1 pitch-stripes" />
         <div className="max-w-3xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <div className="floodlight opacity-70" />
-              <div className="relative w-9 h-9 rounded-xl bg-gradient-to-br from-volt-400 to-volt-600 shadow-glow-sm flex items-center justify-center font-bold text-sm text-slate-950">
-                SF
-              </div>
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 bg-volt-500 flex items-center justify-center font-display font-bold text-sm text-slate-950">
+              SF
             </div>
             <div>
-              <h1 className="text-lg font-bold leading-none">ScoutFit</h1>
-              <p className="text-slate-500 text-xs mt-0.5">Transfer Fit Analyzer</p>
+              <h1 className="font-display text-lg font-semibold leading-none tracking-wide uppercase">ScoutFit</h1>
+              <p className="text-slate-500 text-[11px] mt-0.5">Transfer Fit Analyzer</p>
             </div>
           </div>
           <div
@@ -438,14 +435,14 @@ export default function Home() {
         {step === "club" && (
           <div>
             <div className="w-10 h-1.5 rounded-full pitch-stripes mb-3" />
-            <h2 className="text-xl font-bold mb-1">Which club are you scouting for?</h2>
+            <h2 className="font-display text-2xl font-semibold mb-1">Which club are you scouting for?</h2>
             <p className="text-slate-500 text-sm mb-6">Pick a club to get started.</p>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {clubs.map((c) => (
                 <button
                   key={c.id}
                   onClick={() => chooseClub(c.id)}
-                  className="glass-card rounded-xl p-4 text-left hover:border-volt-500 hover:shadow-glow-sm hover:-translate-y-0.5 transition-all duration-150"
+                  className="glass-card rounded-md p-4 text-left border-l-2 border-l-transparent hover:border-l-volt-500 hover:bg-[#0d1526] transition-colors"
                 >
                   <span className="font-semibold text-slate-100">{c.name}</span>
                 </button>
@@ -458,14 +455,14 @@ export default function Home() {
         {step === "position" && (
           <div>
             <div className="w-10 h-1.5 rounded-full pitch-stripes mb-3" />
-            <h2 className="text-xl font-bold mb-1">What position does {currentClubName} need?</h2>
+            <h2 className="font-display text-2xl font-semibold mb-1">What position does {currentClubName} need?</h2>
             <p className="text-slate-500 text-sm mb-6">Pick the position they're looking to fill.</p>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {Object.entries(POSITIONS).map(([key, label]) => (
                 <button
                   key={key}
                   onClick={() => choosePosition(key as PositionKey)}
-                  className="glass-card rounded-xl p-5 text-left hover:border-volt-500 hover:shadow-glow-sm hover:-translate-y-0.5 transition-all duration-150"
+                  className="glass-card rounded-md p-5 text-left border-l-2 border-l-transparent hover:border-l-volt-500 hover:bg-[#0d1526] transition-colors"
                 >
                   <span className="font-semibold text-slate-100">{label}</span>
                 </button>
@@ -477,7 +474,7 @@ export default function Home() {
         {/* Step 3: stats — drag to rank */}
         {step === "stats" && (
           <div>
-            <h2 className="text-xl font-bold mb-1">Which stats matter most?</h2>
+            <h2 className="font-display text-2xl font-semibold mb-1">Which stats matter most?</h2>
             <p className="text-slate-500 text-sm mb-6">
               Drag to reorder — rank 1 carries the most weight. We've pre-ranked what{" "}
               {currentClubName} usually prioritizes; rearrange to match what you're after.
@@ -490,7 +487,7 @@ export default function Home() {
                   onDragStart={() => handleDragStart(i)}
                   onDragOver={(e) => handleDragOver(e, i)}
                   onDragEnd={handleDragEnd}
-                  className={`w-full flex items-center gap-3 border rounded-xl p-3.5 text-left bg-slate-900/60 transition-colors cursor-grab active:cursor-grabbing ${
+                  className={`w-full flex items-center gap-3 border rounded-md p-3.5 text-left bg-slate-900/60 transition-colors cursor-grab active:cursor-grabbing ${
                     dragIndex === i ? "border-volt-500 bg-volt-500/10" : "border-slate-800"
                   }`}
                 >
@@ -533,7 +530,7 @@ export default function Home() {
 
             <button
               onClick={() => setValueMode((v) => !v)}
-              className={`w-full flex items-center gap-3 border rounded-xl p-3.5 text-left transition-colors mb-6 ${
+              className={`w-full flex items-center gap-3 border rounded-md p-3.5 text-left transition-colors mb-6 ${
                 valueMode
                   ? "border-volt-500 bg-volt-500/10"
                   : "border-slate-800 bg-slate-900/60 hover:border-slate-700"
@@ -557,7 +554,7 @@ export default function Home() {
 
             <button
               onClick={showResults}
-              className="w-full bg-volt-500 disabled:bg-slate-800 disabled:text-slate-600 disabled:shadow-none text-slate-950 font-semibold rounded-xl py-3 hover:bg-volt-400 shadow-glow-sm transition-all"
+              className="w-full bg-volt-500 disabled:bg-slate-800 disabled:text-slate-600 text-slate-950 font-display font-semibold uppercase tracking-wide text-sm rounded-md py-3 hover:bg-volt-400 transition-colors"
             >
               Show recommendations
             </button>
@@ -568,7 +565,7 @@ export default function Home() {
         {step === "results" && (
           <div>
             <div className="flex items-center justify-between mb-1 flex-wrap gap-2">
-              <h2 className="text-xl font-bold">
+              <h2 className="font-display text-2xl font-semibold">
                 Best fits: {currentClubName} · {posKey ? POSITIONS[posKey] : ""}
               </h2>
               <button
@@ -611,7 +608,7 @@ export default function Home() {
               ];
               const hasAny = xiRows.some((r) => r.length > 0);
               return hasAny ? (
-                <div className="border border-slate-800 rounded-xl overflow-hidden mb-5">
+                <div className="border border-slate-800 rounded-md overflow-hidden mb-5">
                   <div className="flex items-center gap-2 text-slate-300 px-4 py-2.5 bg-slate-900">
                     <Shield size={14} />
                     <h3 className="text-xs uppercase tracking-wide font-medium">
@@ -626,7 +623,7 @@ export default function Home() {
               ) : null;
             })()}
 
-            <div className="border border-slate-800 rounded-xl overflow-hidden mb-5">
+            <div className="border border-slate-800 rounded-md overflow-hidden mb-5">
               <div className="flex items-center gap-2 text-slate-300 px-4 py-2.5 bg-slate-900">
                 <Shield size={14} />
                 <h3 className="text-xs uppercase tracking-wide font-medium">
@@ -680,7 +677,7 @@ export default function Home() {
               />
             </div>
 
-            <div className="glass-card rounded-xl p-4">
+            <div className="glass-card rounded-md p-4">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2 text-slate-400">
                   <Users size={14} />
@@ -745,11 +742,11 @@ export default function Home() {
                           <div className="flex items-center gap-2">
                             <div className="w-24 h-1.5 bg-slate-800 rounded-full overflow-hidden">
                               <div
-                                className="h-full bg-gradient-to-r from-volt-600 to-volt-400 rounded-full shadow-glow-sm"
+                                className="h-full bg-volt-500 rounded-full"
                                 style={{ width: `${p.score}%` }}
                               />
                             </div>
-                            <span className="font-semibold tabular-nums text-slate-200 w-9">{p.score.toFixed(1)}</span>
+                            <span className="font-display font-semibold tabular-nums text-slate-100 w-9">{p.score.toFixed(1)}</span>
                           </div>
                         </td>
                         <td className="text-xs text-slate-400 tabular-nums">
@@ -777,7 +774,7 @@ export default function Home() {
             </div>
 
             {compareEntries.length >= 2 && (
-              <div className="glass-card rounded-xl p-4 mt-5">
+              <div className="glass-card rounded-md p-4 mt-5">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2 text-slate-400">
                     <ArrowLeftRight size={14} />

@@ -140,6 +140,27 @@ stat gets the largest share, the bottom stat the smallest — via
 `rankToWeights` in `lib/scoring.ts`. Arrow buttons are included next to
 each row as a non-drag fallback (keyboard/touch friendly).
 
+## Design polish pass (less "AI template," more considered)
+
+A few concrete things were changed to move away from a generic
+AI-generated-app look:
+
+- **Real typography, not default system sans everywhere.** Oswald (a
+  tight, condensed, sports-scoreboard-style face) for headings and Fit
+  Score numbers, Inter for body copy — loaded via `next/font/google` in
+  `app/layout.tsx`. This alone is usually the single biggest tell.
+- **Removed the floodlight-glow and glassmorphism overuse** from the
+  previous pass — flat, confident solid panels (`glass-card` in
+  `globals.css` is now a plain dark fill with a crisp 1px border, no
+  blur) instead of blurred translucent glass on every surface.
+- **Tighter, smaller border-radius** throughout (`rounded-md` instead
+  of `rounded-xl`) — less "bubbly SaaS," more like a real product.
+- **Selection cards use a left-accent-bar on hover** instead of a
+  lift + glow animation, closer to how real list/nav UI actually
+  behaves.
+- Buttons are flatter (no glow shadow), uppercase + tracked in the
+  display font for a scoreboard feel instead of a generic rounded pill.
+
 ## Dark Stadium visual theme
 
 A full redesign from the original flat dark-slate + green look:

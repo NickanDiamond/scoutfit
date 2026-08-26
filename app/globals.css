@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+body {
+  font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+}
+
 
 /* Soccer pitch texture: alternating mowed-grass stripes, used behind the
    header and the current-squad panel for a football-pitch feel. */
@@ -42,23 +46,10 @@
   background-attachment: fixed;
 }
 
-/* Frosted glass card -- replaces flat slate-900 panels for a more
-   premium, layered feel against the stadium backdrop. */
+/* Card surface -- a plain, confident solid fill with a crisp 1px
+   border. No blur, no glass gimmick: a real dark UI reads as a stack of
+   flat panels, not a floating pane of frosted glass over everything. */
 .glass-card {
-  background: rgba(255, 255, 255, 0.035);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-/* A soft blurred glow blob, dropped behind hero elements (logo mark,
-   headline numbers) for a floodlight/spotlight accent. Position with a
-   wrapping relative parent. */
-.floodlight {
-  position: absolute;
-  inset: -40px;
-  background: radial-gradient(circle, rgba(34, 211, 238, 0.35), transparent 70%);
-  filter: blur(20px);
-  pointer-events: none;
-  z-index: -1;
+  background: #0b1220;
+  border: 1px solid rgba(255, 255, 255, 0.09);
 }

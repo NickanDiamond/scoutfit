@@ -6,6 +6,10 @@ module.exports = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        display: ["var(--font-display)", "sans-serif"],
+        sans: ["var(--font-body)", "sans-serif"],
+      },
       colors: {
         // Real grass green -- used only for literal pitch/turf textures
         // (pitch-stripes, pitch-markings in globals.css represent an
